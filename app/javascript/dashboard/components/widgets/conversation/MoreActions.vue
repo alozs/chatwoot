@@ -10,10 +10,13 @@ import ResolveAction from '../../buttons/ResolveAction.vue';
 import ButtonV4 from 'dashboard/components-next/button/Button.vue';
 import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
 
+import { useRoute } from 'vue-router';
 import {
   CMD_MUTE_CONVERSATION,
   CMD_SEND_TRANSCRIPT,
   CMD_UNMUTE_CONVERSATION,
+  CMD_SNOOZE_NOTIFICATION,
+  CMD_DELETE_NOTIFICATION,
 } from 'dashboard/helper/commandbar/events';
 
 // No props needed as we're getting currentChat from the store directly
@@ -24,6 +27,31 @@ const [showEmailActionsModal, toggleEmailModal] = useToggle(false);
 const [showActionsDropdown, toggleDropdown] = useToggle(false);
 
 const currentChat = computed(() => store.getters.getSelectedChat);
+
+// Na Caixa de Entrada havia dois menus de tres pontos empilhados, um por
+// barra. As acoes da notificacao vem para ca; o InboxItemHeader continua
+// dono da logica e do modal, e responde pelos eventos abaixo.
+const route = useRoute();
+const isInboxView = computed(() => route.name === 'inbox_view');
+
+const notificationMenuItems = computed(() =>
+  isInboxView.value
+    ? [
+        {
+          icon: 'i-lucide-bell-minus',
+          label: t('INBOX.ACTION_HEADER.SNOOZE'),
+          action: 'snooze-notification',
+          value: 'snooze-notification',
+        },
+        {
+          icon: 'i-lucide-trash-2',
+          label: t('INBOX.ACTION_HEADER.DELETE'),
+          action: 'delete-notification',
+          value: 'delete-notification',
+        },
+      ]
+    : []
+);
 
 const actionMenuItems = computed(() => {
   const items = [];
@@ -51,7 +79,7 @@ const actionMenuItems = computed(() => {
     value: 'send_transcript',
   });
 
-  return items;
+  return [...items, ...notificationMenuItems.value];
 });
 
 const handleActionClick = ({ action }) => {
@@ -65,6 +93,10 @@ const handleActionClick = ({ action }) => {
     useAlert(t('CONTACT_PANEL.UNMUTED_SUCCESS'));
   } else if (action === 'send_transcript') {
     toggleEmailModal();
+  } else if (action === 'snooze-notification') {
+    emitter.emit(CMD_SNOOZE_NOTIFICATION);
+  } else if (action === 'delete-notification') {
+    emitter.emit(CMD_DELETE_NOTIFICATION);
   }
 };
 
