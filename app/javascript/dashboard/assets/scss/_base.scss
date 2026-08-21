@@ -201,3 +201,34 @@ code {
 table {
   @apply border-spacing-0 text-sm w-full;
 }
+
+// O App.vue declara <transition name="fade"> e o Dashboard usa "route-fade",
+// mas o CSS nunca existiu no projeto: a troca de tela acontecia num quadro so.
+.fade-enter-active,
+.fade-leave-active,
+.route-fade-enter-active,
+.route-fade-leave-active {
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from,
+.route-fade-enter-from {
+  opacity: 0;
+  transform: translateY(0.375rem);
+}
+
+.fade-leave-to,
+.route-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active,
+  .route-fade-enter-active,
+  .route-fade-leave-active {
+    transition: none;
+  }
+}
