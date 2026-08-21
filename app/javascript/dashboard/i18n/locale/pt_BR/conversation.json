@@ -246,6 +246,7 @@
       "WHATSAPP_TEMPLATES": "Modelos do Whatsapp"
     },
     "REPLYBOX": {
+      "NOTE_TOGGLE": "Nota",
       "REPLY": "Responder",
       "PRIVATE_NOTE": "Mensagem Privada",
       "SEND": "Enviar",

@@ -1017,6 +1017,13 @@ export default {
       });
       this.hideContentTemplatesModal();
     },
+    // O modo nota virou um botao ao lado do Enviar, no lugar das abas que
+    // ocupavam uma faixa propria acima do editor.
+    toggleNoteMode() {
+      this.setReplyMode(
+        this.isPrivate ? REPLY_EDITOR_MODES.REPLY : REPLY_EDITOR_MODES.NOTE
+      );
+    },
     setReplyMode(mode = REPLY_EDITOR_MODES.REPLY) {
       // Clear attachments when switching between private note and reply modes
       // This is to prevent from breaking the upload rules
@@ -1506,6 +1513,7 @@ export default {
         :is-on-private-note="isOnPrivateNote"
         :is-recording-audio="isRecordingAudio"
         :is-send-disabled="isReplyButtonDisabled"
+        :is-reply-restricted="!canSendPublicReply"
         :is-note="isPrivate"
         :is-editor-disabled="isEditorDisabled"
         :on-file-upload="onFileUpload"
@@ -1525,6 +1533,7 @@ export default {
         :message="message"
         :portal-slug="connectedPortalSlug"
         :new-conversation-modal-active="newConversationModalActive"
+        @toggle-note-mode="toggleNoteMode"
         @select-whatsapp-template="openWhatsappTemplateModal"
         @select-content-template="openContentTemplateModal"
         @toggle-insert-article="toggleInsertArticle"

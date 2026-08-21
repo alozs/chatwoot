@@ -17,6 +17,10 @@ export default {
   components: { NextButton, FileUpload, VideoCallButton },
   mixins: [inboxMixin],
   props: {
+    isReplyRestricted: {
+      type: Boolean,
+      default: false,
+    },
     isNote: {
       type: Boolean,
       default: false,
@@ -127,6 +131,7 @@ export default {
     },
   },
   emits: [
+    'toggleNoteMode',
     'toggleInsertArticle',
     'selectWhatsappTemplate',
     'selectContentTemplate',
@@ -396,7 +401,19 @@ export default {
         @click="toggleInsertArticle"
       />
     </div>
-    <div class="right-wrap">
+    <div class="right-wrap flex items-center gap-2">
+      <NextButton
+        v-if="!isReplyRestricted"
+        v-tooltip="$t('CONVERSATION.REPLYBOX.PRIVATE_NOTE')"
+        :label="$t('CONVERSATION.REPLYBOX.NOTE_TOGGLE')"
+        icon="i-lucide-sticky-note"
+        sm
+        :color="isNote ? 'amber' : 'slate'"
+        :faded="!isNote"
+        :ghost="!isNote"
+        class="flex-shrink-0"
+        @click="$emit('toggleNoteMode')"
+      />
       <NextButton
         :label="sendButtonText"
         type="submit"
