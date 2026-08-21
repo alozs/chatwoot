@@ -92,7 +92,7 @@ const onCardClick = e => {
 <template>
   <div
     role="button"
-    class="flex w-full gap-3 px-3 py-4 transition-all duration-300 ease-in-out cursor-pointer"
+    class="flex w-full gap-3 px-3 py-4 transition-colors duration-150 ease-out cursor-pointer"
     @click="onCardClick"
   >
     <Avatar

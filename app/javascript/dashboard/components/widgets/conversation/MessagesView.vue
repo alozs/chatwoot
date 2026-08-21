@@ -492,7 +492,8 @@ export default {
     </div>
     <MessageList
       ref="conversationPanelRef"
-      class="conversation-panel flex-shrink flex-grow basis-px flex flex-col overflow-y-auto relative h-full m-0 pb-4"
+      :key="currentChat.id"
+      class="conversation-panel conversation-panel--enter flex-shrink flex-grow basis-px flex flex-col overflow-y-auto relative h-full m-0 pb-4"
       :current-user-id="currentUserId"
       :first-unread-id="unReadMessages[0]?.id"
       :is-an-email-channel="isAnEmailChannel"
@@ -557,3 +558,28 @@ export default {
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+// Ao trocar de conversa o painel recebe uma key nova e remonta. Sem isso a
+// troca e seca: o conteudo anterior some e o novo aparece no mesmo quadro.
+.conversation-panel--enter {
+  animation: conversation-panel-in 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes conversation-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conversation-panel--enter {
+    animation: none;
+  }
+}
+</style>
