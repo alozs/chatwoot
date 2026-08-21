@@ -49,17 +49,12 @@ const bccEmail = computed(() => {
   );
 });
 
-const subject = computed(() => {
-  return contentAttributes.value?.email?.subject ?? '';
-});
-
 const showMeta = computed(() => {
   return (
     fromEmail.value[0] ||
     toEmail.value.length ||
     ccEmail.value.length ||
-    bccEmail.value.length ||
-    subject.value
+    bccEmail.value.length
   );
 });
 </script>
@@ -95,10 +90,6 @@ const showMeta = computed(() => {
       <div v-if="bccEmail.length">
         {{ $t('EMAIL_HEADER.BCC') }}:
         {{ bccEmail.join(', ') }}
-      </div>
-      <div v-if="subject">
-        {{ $t('EMAIL_HEADER.SUBJECT') }}:
-        {{ subject }}
       </div>
     </template>
   </section>

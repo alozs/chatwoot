@@ -1,4 +1,6 @@
 <script>
+import { emitter } from 'shared/helpers/mitt';
+import { CMD_SET_DASHBOARD_APP_TAB } from 'dashboard/helper/commandbar/events';
 import { mapGetters } from 'vuex';
 import ConversationHeader from './ConversationHeader.vue';
 import DashboardAppFrame from '../DashboardApp/Frame.vue';
@@ -77,6 +79,10 @@ export default {
   mounted() {
     this.fetchLabels();
     this.$store.dispatch('dashboardApps/get');
+    emitter.on(CMD_SET_DASHBOARD_APP_TAB, this.onCmdSetDashboardAppTab);
+  },
+  unmounted() {
+    emitter.off(CMD_SET_DASHBOARD_APP_TAB, this.onCmdSetDashboardAppTab);
   },
   methods: {
     fetchLabels() {
@@ -84,6 +90,9 @@ export default {
         return;
       }
       this.$store.dispatch('conversationLabels/get', this.currentChat.id);
+    },
+    onCmdSetDashboardAppTab(index) {
+      this.activeIndex = index;
     },
     onDashboardAppTabChange(index) {
       this.activeIndex = index;
@@ -103,25 +112,8 @@ export default {
       v-if="currentChat.id"
       :chat="currentChat"
       :show-back-button="isOnExpandedLayout && !isInboxView"
-      :class="{
-        'border-b border-b-n-weak !pt-2': !dashboardApps.length,
-      }"
+      class="border-b border-b-n-weak !pt-2"
     />
-    <woot-tabs
-      v-if="dashboardApps.length && currentChat.id"
-      :index="activeIndex"
-      class="h-10"
-      @change="onDashboardAppTabChange"
-    >
-      <woot-tabs-item
-        v-for="tab in dashboardAppTabs"
-        :key="tab.key"
-        :index="tab.index"
-        :name="tab.name"
-        :show-badge="false"
-        is-compact
-      />
-    </woot-tabs>
     <div v-show="!activeIndex" class="flex h-full min-h-0 m-0">
       <MessagesView
         v-if="currentChat.id"

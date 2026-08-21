@@ -17,6 +17,7 @@ import {
   CMD_UNMUTE_CONVERSATION,
   CMD_SNOOZE_NOTIFICATION,
   CMD_DELETE_NOTIFICATION,
+  CMD_SET_DASHBOARD_APP_TAB,
 } from 'dashboard/helper/commandbar/events';
 
 // No props needed as we're getting currentChat from the store directly
@@ -33,6 +34,31 @@ const currentChat = computed(() => store.getters.getSelectedChat);
 // dono da logica e do modal, e responde pelos eventos abaixo.
 const route = useRoute();
 const isInboxView = computed(() => route.name === 'inbox_view');
+
+// As abas dos Dashboard Apps ocupavam uma faixa propria de 40px acima das
+// mensagens. Viram itens daqui; a faixa deixou de ser renderizada.
+const dashboardApps = computed(
+  () => store.getters['dashboardApps/getRecords'] || []
+);
+
+const dashboardAppMenuItems = computed(() =>
+  dashboardApps.value.length
+    ? [
+        {
+          icon: 'i-lucide-messages-square',
+          label: t('CONVERSATION.DASHBOARD_APP_TAB_MESSAGES'),
+          action: 'dashboard-app-0',
+          value: 'dashboard-app-0',
+        },
+        ...dashboardApps.value.map((app, index) => ({
+          icon: 'i-lucide-layout-panel-left',
+          label: app.title,
+          action: `dashboard-app-${index + 1}`,
+          value: `dashboard-app-${index + 1}`,
+        })),
+      ]
+    : []
+);
 
 const notificationMenuItems = computed(() =>
   isInboxView.value
@@ -79,7 +105,11 @@ const actionMenuItems = computed(() => {
     value: 'send_transcript',
   });
 
-  return [...items, ...notificationMenuItems.value];
+  return [
+    ...items,
+    ...dashboardAppMenuItems.value,
+    ...notificationMenuItems.value,
+  ];
 });
 
 const handleActionClick = ({ action }) => {
@@ -97,6 +127,11 @@ const handleActionClick = ({ action }) => {
     emitter.emit(CMD_SNOOZE_NOTIFICATION);
   } else if (action === 'delete-notification') {
     emitter.emit(CMD_DELETE_NOTIFICATION);
+  } else if (action.startsWith('dashboard-app-')) {
+    emitter.emit(
+      CMD_SET_DASHBOARD_APP_TAB,
+      Number(action.replace('dashboard-app-', ''))
+    );
   }
 };
 
