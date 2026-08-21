@@ -70,3 +70,38 @@ onUnmounted(() => {
     </transition-group>
   </div>
 </template>
+
+<style lang="scss">
+// O transition-group ja usava o nome "toast-fade", mas o CSS nunca existiu:
+// as notificacoes apareciam e sumiam num quadro so.
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
+// Empurra os toasts restantes com suavidade quando um sai do meio da pilha.
+.toast-fade-move {
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-fade-leave-active {
+  position: absolute;
+  inset-inline: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-fade-enter-active,
+  .toast-fade-leave-active,
+  .toast-fade-move {
+    transition: none;
+  }
+}
+</style>

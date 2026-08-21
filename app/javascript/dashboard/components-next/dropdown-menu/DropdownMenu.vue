@@ -137,7 +137,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="bg-n-alpha-3 backdrop-blur-[100px] border-0 outline outline-1 outline-n-container absolute rounded-xl z-50 flex flex-col min-w-[136px] shadow-lg pt-2 overflow-hidden"
+    class="dropdown-menu--enter bg-n-alpha-3 backdrop-blur-[100px] border-0 outline outline-1 outline-n-container absolute rounded-xl z-50 flex flex-col min-w-[136px] shadow-lg pt-2 overflow-hidden"
   >
     <div v-if="showSearch" class="relative shrink-0 px-2 mb-2">
       <span
@@ -300,3 +300,29 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+// Os menus entram com v-if, entao apareciam de uma vez. A animacao roda na
+// montagem; a saida continua imediata, que e o esperado ao escolher um item.
+.dropdown-menu--enter {
+  animation: dropdown-menu-in 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top var(--dropdown-origin, right);
+}
+
+@keyframes dropdown-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu--enter {
+    animation: none;
+  }
+}
+</style>
