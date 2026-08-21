@@ -96,7 +96,8 @@ const handleSeeOriginal = () => {
   <BaseBubble
     class="w-full"
     :class="{
-      'bg-n-slate-4': isIncoming,
+      'bg-n-solid-1 outline outline-1 -outline-offset-1 outline-n-weak':
+        isIncoming,
       'bg-n-solid-blue': isOutgoing,
     }"
     data-bubble-name="email"
