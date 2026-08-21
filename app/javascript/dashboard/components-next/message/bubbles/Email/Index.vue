@@ -5,7 +5,6 @@ import { sanitizeTextForRender } from '@chatwoot/utils';
 import { allowedCssProperties } from 'lettersanitizer';
 
 import Icon from 'next/icon/Icon.vue';
-import { EmailQuoteExtractor } from 'dashboard/helper/emailQuoteExtractor.js';
 import FormattedContent from 'next/message/bubbles/Text/FormattedContent.vue';
 import BaseBubble from 'next/message/bubbles/Base.vue';
 import AttachmentChips from 'next/message/chips/AttachmentChips.vue';
@@ -21,7 +20,6 @@ const { content, contentAttributes, attachments, messageType } =
 
 const isExpandable = ref(false);
 const isExpanded = ref(false);
-const showQuotedMessage = ref(false);
 const renderOriginal = ref(false);
 const contentContainer = useTemplateRef('contentContainer');
 
@@ -80,14 +78,6 @@ const fullHTML = computed(() => {
   // Otherwise show original HTML
   return originalEmailHtml.value;
 });
-
-const unquotedHTML = computed(() =>
-  EmailQuoteExtractor.extractQuotes(fullHTML.value)
-);
-
-const hasQuotedMessage = computed(() =>
-  EmailQuoteExtractor.hasQuotes(fullHTML.value)
-);
 
 // Ensure unique keys for <Letter> when toggling between original and translated views.
 // This forces Vue to re-render the component and update content correctly.
@@ -150,7 +140,6 @@ const handleSeeOriginal = () => {
         />
         <template v-else>
           <Letter
-            v-if="showQuotedMessage"
             :key="`letter-quoted-${translationKeySuffix}`"
             class-name="prose prose-bubble !max-w-none letter-render"
             :allowed-css-properties="[
@@ -161,38 +150,7 @@ const handleSeeOriginal = () => {
             :html="fullHTML"
             :text="textToShow"
           />
-          <Letter
-            v-else
-            :key="`letter-unquoted-${translationKeySuffix}`"
-            class-name="prose prose-bubble !max-w-none letter-render"
-            :html="unquotedHTML"
-            :allowed-css-properties="[
-              ...allowedCssProperties,
-              'transform',
-              'transform-origin',
-            ]"
-            :text="textToShow"
-          />
         </template>
-        <button
-          v-if="hasQuotedMessage"
-          class="text-n-slate-11 px-1 leading-none text-sm bg-n-alpha-black2 text-center flex items-center gap-1 mt-2"
-          @click="showQuotedMessage = !showQuotedMessage"
-        >
-          <template v-if="showQuotedMessage">
-            {{ $t('CHAT_LIST.HIDE_QUOTED_TEXT') }}
-          </template>
-          <template v-else>
-            {{ $t('CHAT_LIST.SHOW_QUOTED_TEXT') }}
-          </template>
-          <Icon
-            :icon="
-              showQuotedMessage
-                ? 'i-lucide-chevron-up'
-                : 'i-lucide-chevron-down'
-            "
-          />
-        </button>
       </div>
     </section>
     <TranslationToggle
