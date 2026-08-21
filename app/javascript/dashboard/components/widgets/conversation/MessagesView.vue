@@ -116,6 +116,12 @@ export default {
     inbox() {
       return this.$store.getters['inboxes/getInbox'](this.inboxId);
     },
+    // Canal de mensagem se le de baixo para cima: a conversa abre na ultima
+    // mensagem, como no proprio WhatsApp. E-mail se le de cima para baixo,
+    // entao abre no inicio do conteudo em vez de pular para o meio.
+    opensAtLatestMessage() {
+      return this.inbox?.channel_type !== INBOX_TYPES.EMAIL;
+    },
     typingUsersList() {
       const userList = this.$store.getters[
         'conversationTypingStatus/getUserList'
@@ -356,7 +362,14 @@ export default {
       this.conversationPanel = this.$el.querySelector('.conversation-panel');
       this.setScrollParams();
       this.conversationPanel.addEventListener('scroll', this.handleScroll);
-      this.$nextTick(() => this.scrollToBottom());
+      this.$nextTick(() => {
+        if (this.opensAtLatestMessage) {
+          this.scrollToBottom();
+        } else {
+          this.isProgrammaticScroll = true;
+          this.conversationPanel.scrollTop = 0;
+        }
+      });
       this.isLoadingPrevious = false;
     },
     removeScrollListener() {
