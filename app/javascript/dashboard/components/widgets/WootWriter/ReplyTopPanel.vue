@@ -126,6 +126,12 @@ export default {
     };
   },
   computed: {
+    // Sem o seletor de modo, que virou botao ao lado do Enviar, este painel
+    // pode nao ter nada para mostrar. Quando e o caso, ele some em vez de
+    // reservar 52px vazios acima do editor.
+    showPanel() {
+      return this.captainTasksEnabled || this.isMessageLengthReachingThreshold;
+    },
     replyButtonClass() {
       return {
         'is-active': this.mode === REPLY_EDITOR_MODES.REPLY,
@@ -150,6 +156,7 @@ export default {
 
 <template>
   <div
+    v-if="showPanel"
     class="flex justify-between gap-2 h-[3.25rem] items-center ltr:pl-3 ltr:pr-2 rtl:pr-3 rtl:pl-2"
   >
     <div class="flex items-center mx-4 my-0">
