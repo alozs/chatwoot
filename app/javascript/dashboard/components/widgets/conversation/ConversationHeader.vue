@@ -72,6 +72,15 @@ const currentContact = computed(() =>
   store.getters['contacts/getContact'](props.chat.meta.sender.id)
 );
 
+// Identifica a conversa alem do nome do contato: no e-mail, o assunto; nos
+// canais de mensagem, que nao tem assunto, o telefone do contato.
+const headerDetail = computed(
+  () =>
+    props.chat?.additional_attributes?.mail_subject ||
+    currentContact.value?.phone_number ||
+    ''
+);
+
 const isSnoozed = computed(
   () => currentChat.value.status === wootConstants.STATUS_TYPE.SNOOZED
 );
@@ -141,6 +150,13 @@ const copyConversationId = async () => {
             class="text-n-amber-10 my-0 mx-0 min-w-[14px] flex-shrink-0"
             icon="warning"
           />
+          <span
+            v-if="headerDetail"
+            :title="headerDetail"
+            class="min-w-0 text-xs truncate text-n-slate-11"
+          >
+            {{ headerDetail }}
+          </span>
         </div>
 
         <div
