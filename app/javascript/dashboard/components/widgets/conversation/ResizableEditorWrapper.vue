@@ -15,8 +15,16 @@ const props = defineProps({
   containerHeight: { type: Number, default: 0 },
 });
 
-const DEFAULT_HEIGHT = 120;
-const MIN_HEIGHT = 80;
+// Alturas em px. O editor nasce com ~2 linhas e cresce com o que voce digita
+// ate ~5 linhas; dai em diante o proprio editor rola. Arrastar a alca continua
+// podendo passar disso — o teto abaixo vale so para o crescimento automatico.
+const LINE_HEIGHT = 21;
+const EDITOR_PADDING = 26;
+const lines = n => n * LINE_HEIGHT + EDITOR_PADDING;
+
+const DEFAULT_HEIGHT = lines(2);
+const MIN_HEIGHT = lines(2);
+const CONTENT_MAX_HEIGHT = lines(5);
 const MIN_MESSAGES_HEIGHT = 200;
 const EXPAND_RATIO = 0.5;
 const RESET_DELAY_MS = 120;
@@ -53,7 +61,11 @@ const clampToBounds = val =>
 // The dragged height always comes back, content can only ask the editor to grow
 const appliedHeight = computed(() => {
   const requested = requestedHeight.value
-    ? Math.max(requestedHeight.value, sizeBounds.value.default)
+    ? clamp(
+        Math.max(requestedHeight.value, sizeBounds.value.default),
+        MIN_HEIGHT,
+        CONTENT_MAX_HEIGHT
+      )
     : 0;
   return clampToBounds(Math.max(requested, editorHeight.value));
 });
