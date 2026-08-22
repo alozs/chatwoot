@@ -38,10 +38,10 @@ const slaCardLabel = ref(null);
 // Lido e nao lido diferiam so entre dois cinzas vizinhos. O lido recua para
 // slate-10 e o nao lido avanca em peso, para a diferenca aparecer de relance.
 const getMessageClasses = {
-  emphasis: 'text-sm font-medium text-n-slate-10',
-  emphasisUnread: 'text-sm font-semibold text-n-slate-12',
-  normal: 'text-sm font-normal text-n-slate-10',
-  normalUnread: 'text-sm font-normal text-n-slate-12',
+  emphasis: 'text-[13px] font-medium text-n-slate-10',
+  emphasisUnread: 'text-[13px] font-semibold text-n-slate-12',
+  normal: 'text-xs font-normal text-n-slate-10',
+  normalUnread: 'text-xs font-normal text-n-slate-12',
 };
 
 const primaryActor = computed(() => props.inboxItem?.primaryActor);
@@ -156,7 +156,7 @@ onBeforeMount(contextMenuActions.close);
 <template>
   <div
     role="button"
-    class="flex flex-col w-full gap-1 p-3 transition-colors duration-150 ease-out cursor-pointer"
+    class="flex flex-col w-full gap-1 px-3 py-2.5 transition-colors duration-150 ease-out cursor-pointer"
     :class="isUnread ? 'bg-n-solid-1' : 'bg-transparent'"
     @contextmenu="contextMenuActions.open($event)"
     @click="emit('click')"
@@ -174,7 +174,7 @@ onBeforeMount(contextMenuActions.close);
         class="min-w-0 mb-0 line-clamp-3"
       />
     </div>
-    <div class="flex items-center justify-between h-6 gap-2">
+    <div class="flex items-center justify-between h-5 gap-2">
       <div class="flex items-center flex-1 min-w-0 gap-1">
         <div
           v-if="snoozedUntilTime || hasLastSnoozed"

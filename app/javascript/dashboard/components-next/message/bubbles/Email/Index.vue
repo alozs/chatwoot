@@ -1,10 +1,9 @@
 <script setup>
-import { computed, useTemplateRef, ref, onMounted } from 'vue';
+import { computed, useTemplateRef, ref } from 'vue';
 import { Letter } from 'vue-letter';
 import { sanitizeTextForRender } from '@chatwoot/utils';
 import { allowedCssProperties } from 'lettersanitizer';
 
-import Icon from 'next/icon/Icon.vue';
 import FormattedContent from 'next/message/bubbles/Text/FormattedContent.vue';
 import BaseBubble from 'next/message/bubbles/Base.vue';
 import AttachmentChips from 'next/message/chips/AttachmentChips.vue';
@@ -18,14 +17,8 @@ import { useTranslations } from 'dashboard/composables/useTranslations';
 const { content, contentAttributes, attachments, messageType } =
   useMessageContext();
 
-const isExpandable = ref(false);
-const isExpanded = ref(false);
 const renderOriginal = ref(false);
 const contentContainer = useTemplateRef('contentContainer');
-
-onMounted(() => {
-  isExpandable.value = contentContainer.value?.scrollHeight > 400;
-});
 
 const isOutgoing = computed(() => messageType.value === MESSAGE_TYPES.OUTGOING);
 const isIncoming = computed(() => !isOutgoing.value);
@@ -110,30 +103,7 @@ const handleSeeOriginal = () => {
       }"
     />
     <section ref="contentContainer" class="p-3">
-      <div
-        :class="{
-          'max-h-[400px] overflow-hidden relative': !isExpanded && isExpandable,
-          'overflow-y-scroll relative': isExpanded,
-        }"
-      >
-        <div
-          v-if="isExpandable && !isExpanded"
-          class="absolute left-0 right-0 bottom-0 h-40 px-8 flex items-end"
-          :class="{
-            'bg-gradient-to-t from-n-slate-4 via-n-slate-4 via-20% to-transparent':
-              isIncoming,
-            'bg-gradient-to-t from-n-solid-blue via-n-solid-blue via-20% to-transparent':
-              isOutgoing,
-          }"
-        >
-          <button
-            class="text-n-slate-12 py-2 px-8 mx-auto text-center flex items-center gap-2"
-            @click="isExpanded = true"
-          >
-            <Icon icon="i-lucide-maximize-2" />
-            {{ $t('EMAIL_HEADER.EXPAND') }}
-          </button>
-        </div>
+      <div class="relative">
         <FormattedContent
           v-if="isOutgoing && content && !hasEmailContent"
           class="text-n-slate-12"
