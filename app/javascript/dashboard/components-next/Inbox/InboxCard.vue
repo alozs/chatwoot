@@ -35,11 +35,13 @@ const isContextMenuOpen = ref(false);
 const contextMenuPosition = ref({ x: null, y: null });
 const slaCardLabel = ref(null);
 
+// Lido e nao lido diferiam so entre dois cinzas vizinhos. O lido recua para
+// slate-10 e o nao lido avanca em peso, para a diferenca aparecer de relance.
 const getMessageClasses = {
-  emphasis: 'text-sm font-medium text-n-slate-11',
-  emphasisUnread: 'text-sm font-medium text-n-slate-12',
-  normal: 'text-sm font-normal text-n-slate-11',
-  normalUnread: 'text-sm text-n-slate-12',
+  emphasis: 'text-sm font-medium text-n-slate-10',
+  emphasisUnread: 'text-sm font-semibold text-n-slate-12',
+  normal: 'text-sm font-normal text-n-slate-10',
+  normalUnread: 'text-sm font-normal text-n-slate-12',
 };
 
 const primaryActor = computed(() => props.inboxItem?.primaryActor);
@@ -86,7 +88,7 @@ const formatPushMessage = message => {
   }
 
   return message.replace(/^([^:]+):/g, (match, name) => {
-    return `<span class="${messageClasses.value.emphasis}">${name}:</span>`;
+    return `<span class="${messageClasses.value.emphasis} block truncate">${name}</span>`;
   });
 };
 
@@ -94,7 +96,7 @@ const formattedMessage = computed(() => {
   const messageContent = `<span class="${messageClasses.value.normal}">${formatPushMessage(props.inboxItem?.pushMessageBody || '')}</span>`;
 
   return isUnread.value
-    ? `<span class="inline-flex flex-shrink-0 w-2 h-2 mb-px rounded-full bg-n-iris-10 ltr:mr-1 rtl:ml-1"></span> ${messageContent}`
+    ? `<span class="inline-flex flex-shrink-0 w-2 h-2 mb-px rounded-full bg-n-slate-12 ltr:mr-1.5 rtl:ml-1.5"></span> ${messageContent}`
     : messageContent;
 });
 
@@ -154,7 +156,8 @@ onBeforeMount(contextMenuActions.close);
 <template>
   <div
     role="button"
-    class="flex flex-col w-full gap-1 p-3 transition-all duration-300 ease-in-out cursor-pointer"
+    class="flex flex-col w-full gap-1 p-3 transition-colors duration-150 ease-out cursor-pointer"
+    :class="isUnread ? 'bg-n-solid-1' : 'bg-transparent'"
     @contextmenu="contextMenuActions.open($event)"
     @click="emit('click')"
   >
@@ -166,7 +169,10 @@ onBeforeMount(contextMenuActions.close);
         rounded-full
         class="mt-1"
       />
-      <p v-dompurify-html="formattedMessage" class="mb-0 line-clamp-2" />
+      <p
+        v-dompurify-html="formattedMessage"
+        class="min-w-0 mb-0 line-clamp-3"
+      />
     </div>
     <div class="flex items-center justify-between h-6 gap-2">
       <div class="flex items-center flex-1 min-w-0 gap-1">
