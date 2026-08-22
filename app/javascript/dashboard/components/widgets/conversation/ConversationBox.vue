@@ -111,7 +111,7 @@ export default {
     <ConversationHeader
       v-if="currentChat.id"
       :chat="currentChat"
-      :show-back-button="isOnExpandedLayout && !isInboxView"
+      :show-back-button="isOnExpandedLayout || isInboxView"
       class="border-b border-b-n-weak !pt-2"
     />
     <div v-show="!activeIndex" class="flex h-full min-h-0 m-0">

@@ -9,32 +9,19 @@ import {
 import wootConstants from 'dashboard/constants/globals';
 import { findSnoozeTime } from 'dashboard/helper/snoozeHelpers';
 import { INBOX_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
-import PaginationButton from './PaginationButton.vue';
 import CustomSnoozeModal from 'dashboard/components/CustomSnoozeModal.vue';
 import { emitter } from 'shared/helpers/mitt';
-import BackButton from 'dashboard/components/widgets/BackButton.vue';
 
 export default {
   components: {
-    PaginationButton,
-    BackButton,
     CustomSnoozeModal,
   },
   props: {
-    totalLength: {
-      type: Number,
-      default: 0,
-    },
-    currentIndex: {
-      type: Number,
-      default: 0,
-    },
     activeNotification: {
       type: Object,
       default: null,
     },
   },
-  emits: ['next', 'prev'],
   data() {
     return { showCustomSnoozeModal: false };
   },
@@ -99,12 +86,6 @@ export default {
         });
       this.$router.replace({ name: 'inbox_view' });
     },
-    onClickNext() {
-      this.$emit('next');
-    },
-    onClickPrev() {
-      this.$emit('prev');
-    },
     onClickGoToInboxList() {
       this.$router.replace({ name: 'inbox_view' });
     },
@@ -113,31 +94,13 @@ export default {
 </script>
 
 <template>
-  <div
-    class="flex items-center justify-between w-full gap-2 border-b px-3 h-12 rtl:border-r border-n-weak flex-shrink-0 bg-n-surface-1"
+  <woot-modal
+    v-model:show="showCustomSnoozeModal"
+    :on-close="hideCustomSnoozeModal"
   >
-    <div class="flex items-center gap-4">
-      <BackButton
-        compact
-        :button-label="$t('INBOX.ACTION_HEADER.BACK')"
-        class="xl:hidden flex"
-      />
-      <PaginationButton
-        v-if="totalLength > 1"
-        :total-length="totalLength"
-        :current-index="currentIndex + 1"
-        @next="onClickNext"
-        @prev="onClickPrev"
-      />
-    </div>
-    <woot-modal
-      v-model:show="showCustomSnoozeModal"
-      :on-close="hideCustomSnoozeModal"
-    >
-      <CustomSnoozeModal
-        @close="hideCustomSnoozeModal"
-        @choose-time="scheduleCustomSnooze"
-      />
-    </woot-modal>
-  </div>
+    <CustomSnoozeModal
+      @close="hideCustomSnoozeModal"
+      @choose-time="scheduleCustomSnooze"
+    />
+  </woot-modal>
 </template>
