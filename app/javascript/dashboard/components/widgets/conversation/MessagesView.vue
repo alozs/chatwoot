@@ -574,6 +574,27 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+// Degrade suave atras das mensagens. E a maior area continua da tela, entao e
+// onde um fundo tingido aparece de verdade — no #app ele ficaria escondido
+// atras dos paineis opacos.
+.conversation-panel {
+  background-image: linear-gradient(
+    170deg,
+    rgb(237 239 251) 0%,
+    rgb(245 246 252) 42%,
+    rgb(249 249 253) 100%
+  );
+}
+
+:global(.dark) .conversation-panel {
+  background-image: linear-gradient(
+    170deg,
+    rgb(29 30 44) 0%,
+    rgb(23 24 33) 45%,
+    rgb(20 21 28) 100%
+  );
+}
+
 // Ao trocar de conversa o painel recebe uma key nova e remonta. Sem isso a
 // troca e seca: o conteudo anterior some e o novo aparece no mesmo quadro.
 .conversation-panel--enter {
