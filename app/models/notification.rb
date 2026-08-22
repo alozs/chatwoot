@@ -143,7 +143,10 @@ class Notification < ApplicationRecord
   end
 
   def message_content(actor)
-    content = actor.try(:content)
+    # Em e-mail o corpo pode comecar com o conteudo do bloco <style>, e a
+    # notificacao acabava exibindo CSS. O assunto identifica melhor a mensagem,
+    # e e o mesmo criterio que a lista de conversas ja usa.
+    content = email_subject(actor).presence || actor.try(:content)
     attachments = actor.try(:attachments)
 
     if content.present?
@@ -151,6 +154,10 @@ class Notification < ApplicationRecord
     else
       attachments.present? ? I18n.t('notifications.attachment') : I18n.t('notifications.no_content')
     end
+  end
+
+  def email_subject(actor)
+    actor.try(:content_attributes)&.dig('email', 'subject').to_s
   end
 
   def process_notification_delivery
