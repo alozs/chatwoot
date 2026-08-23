@@ -73,6 +73,9 @@ const displayList = computed(() =>
     props.conversationList,
     {
       keyOf: c => {
+        // Nao lida nunca entra em grupo: o badge da lateral diz que existe
+        // algo a ler, entao esse algo precisa estar visivel na lista.
+        if ((c?.unread_count ?? 0) > 0) return null;
         const senderId = c?.meta?.sender?.id;
         return senderId ? `${senderId}-${c.inbox_id}` : null;
       },
