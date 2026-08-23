@@ -7,6 +7,11 @@ json.data do
 
   json.payload do
     json.array! @notifications do |notification|
+      # Uma notificacao orfa (ator excluido, com o destroy_async perdido)
+      # derrubava a listagem inteira: push_event_data em nil. Pula o registro
+      # em vez de quebrar a resposta.
+      next if notification.primary_actor.nil?
+
       json.id notification.id
       json.notification_type notification.notification_type
       json.push_message_title notification.push_message_title
