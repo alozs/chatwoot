@@ -105,7 +105,11 @@ const fetchSignatureFlagFromUISettings = (channelType, uiSettings) => {
   if (!channelType) return false;
 
   const slugifiedChannel = slugifyChannel(channelType);
-  return uiSettings.value[`${slugifiedChannel}_signature_enabled`];
+  const flag = uiSettings.value[`${slugifiedChannel}_signature_enabled`];
+  // Em e-mail a assinatura vale por padrao: quem a salvou no perfil espera
+  // que ela saia, e o botao da barra continua desligando (grava false).
+  if (flag === undefined && slugifiedChannel === 'channel_email') return true;
+  return flag;
 };
 
 const fetchQuotedReplyFlagFromUISettings = (channelType, uiSettings) => {
