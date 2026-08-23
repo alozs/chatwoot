@@ -223,8 +223,9 @@ export const colors = {
 
     black: '#000000',
     // Cor de acao primaria. O upstream usa o azul do Chatwoot; aqui o primario
-    // e quase preto, como no restante da paleta neutra.
-    brand: '#262626',
+    // e neutro e definido por tema em _next-colors.scss, porque um hex fixo
+    // quase preto sumia no tema escuro.
+    brand: 'rgb(var(--brand) / <alpha-value>)',
     portal: 'var(--dynamic-portal-color)',
     'portal-soft': 'var(--dynamic-portal-color-soft)',
     'portal-faint': 'var(--dynamic-portal-color-faint)',

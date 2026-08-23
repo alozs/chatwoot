@@ -39,6 +39,17 @@ const unreadCount = computed(() => props.chat.unread_count);
 const hasUnread = computed(() => unreadCount.value > 0);
 const lastMessageInChat = computed(() => getLastMessage(props.chat));
 
+// Ambar marca conversa aberta cuja ultima mensagem e do contato e ja espera
+// resposta ha mais de 4 horas. Vale para todos os canais.
+const AWAITING_REPLY_THRESHOLD_SECONDS = 4 * 60 * 60;
+const isAwaitingReplyTooLong = computed(() => {
+  const last = lastMessageInChat.value;
+  if (props.chat.status !== 'open' || !last) return false;
+  if (last.message_type !== 0) return false;
+  const ageSeconds = Date.now() / 1000 - (last.created_at ?? 0);
+  return ageSeconds > AWAITING_REPLY_THRESHOLD_SECONDS;
+});
+
 const voiceCallData = computed(() => {
   const last = lastMessageInChat.value;
   if (last?.content_type !== 'voice_call' || !last.call) {
@@ -220,7 +231,16 @@ watch(
         class="absolute flex flex-col ltr:right-3 rtl:left-3"
         :class="showMetaSection ? 'top-8' : 'top-4'"
       >
-        <span class="ml-auto font-normal leading-4 text-xxs">
+        <span
+          class="ml-auto font-normal leading-4 text-xxs inline-flex items-center gap-1"
+        >
+          <fluent-icon
+            v-if="isAwaitingReplyTooLong"
+            v-tooltip.left="$t('CHAT_LIST.AWAITING_REPLY_TOO_LONG')"
+            icon="send-clock"
+            size="12"
+            class="text-n-amber-10 flex-shrink-0"
+          />
           <TimeAgo
             :last-activity-timestamp="chat.timestamp"
             :created-at-timestamp="chat.created_at"

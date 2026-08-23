@@ -145,6 +145,11 @@
     "SHOW_QUOTED_TEXT": "Show Quoted Text",
     "MESSAGE_READ": "Read",
     "SENDING": "Sending",
-    "UNREAD_COUNT_OVERFLOW": "9+"
+    "UNREAD_COUNT_OVERFLOW": "9+",
+    "AWAITING_REPLY_TOO_LONG": "Awaiting reply for over 4 hours",
+    "GROUP": {
+      "SHOW_MORE": "Show {count} more from {name}",
+      "COLLAPSE": "Collapse conversations from this sender"
+    }
   }
 }

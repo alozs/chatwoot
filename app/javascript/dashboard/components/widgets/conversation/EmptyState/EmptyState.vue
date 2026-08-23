@@ -33,7 +33,25 @@ export default {
       inboxesList: 'inboxes/getInboxes',
       uiFlags: 'inboxes/getUIFlags',
       loadingChatList: 'getChatListLoadingStatus',
+      conversationStats: 'conversationStats/getStats',
     }),
+    // Resumo do dia no lugar do espaco morto: o estado vazio e a tela mais
+    // vista do painel, entao mostra o que ha para fazer.
+    summaryItems() {
+      const {
+        mineCount = 0,
+        unAssignedCount = 0,
+        allCount = 0,
+      } = this.conversationStats || {};
+      return [
+        { label: this.$t('CONVERSATION.SUMMARY.MINE'), value: mineCount },
+        {
+          label: this.$t('CONVERSATION.SUMMARY.UNASSIGNED'),
+          value: unAssignedCount,
+        },
+        { label: this.$t('CONVERSATION.SUMMARY.ALL'), value: allCount },
+      ];
+    },
     loadingIndicatorMessage() {
       if (this.uiFlags.isFetching) {
         return this.$t('CONVERSATION.LOADING_INBOXES');
@@ -89,10 +107,23 @@ export default {
         v-if="!allConversations.length"
         :message="$t('CONVERSATION.NO_MESSAGE_1')"
       />
-      <EmptyStateMessage
-        v-else-if="allConversations.length && !currentChat.id"
-        :message="conversationMissingMessage"
-      />
+      <template v-else-if="allConversations.length && !currentChat.id">
+        <EmptyStateMessage :message="conversationMissingMessage" />
+        <div class="flex items-center gap-6 mt-6">
+          <div
+            v-for="item in summaryItems"
+            :key="item.label"
+            class="flex flex-col items-center gap-0.5 min-w-16"
+          >
+            <span
+              class="text-xl font-semibold text-n-slate-12 tabular-nums leading-6"
+            >
+              {{ item.value }}
+            </span>
+            <span class="text-xs text-n-slate-10">{{ item.label }}</span>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>

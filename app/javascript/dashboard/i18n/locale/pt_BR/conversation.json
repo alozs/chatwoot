@@ -371,6 +371,11 @@
       "UNMUTE": "Desilenciar microfone",
       "VIEW_CHAT_HISTORY": "Ver histórico da conversa",
       "GO_TO_CONVERSATION": "Ir para a conversa"
+    },
+    "SUMMARY": {
+      "MINE": "Minhas",
+      "UNASSIGNED": "Sem responsável",
+      "ALL": "Abertas"
     }
   },
   "EMAIL_TRANSCRIPT": {

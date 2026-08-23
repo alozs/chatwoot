@@ -145,6 +145,11 @@
     "SHOW_QUOTED_TEXT": "Mostrar Texto Citado",
     "MESSAGE_READ": "Lida",
     "SENDING": "Enviando",
-    "UNREAD_COUNT_OVERFLOW": "9+"
+    "UNREAD_COUNT_OVERFLOW": "9+",
+    "AWAITING_REPLY_TOO_LONG": "Aguardando resposta há mais de 4 horas",
+    "GROUP": {
+      "SHOW_MORE": "Mostrar mais {count} de {name}",
+      "COLLAPSE": "Recolher conversas do mesmo remetente"
+    }
   }
 }

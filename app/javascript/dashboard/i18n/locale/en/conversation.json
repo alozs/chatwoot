@@ -409,6 +409,11 @@
       "UNMUTE": "Unmute mic",
       "VIEW_CHAT_HISTORY": "View chat history",
       "GO_TO_CONVERSATION": "Go to conversation thread"
+    },
+    "SUMMARY": {
+      "MINE": "Mine",
+      "UNASSIGNED": "Unassigned",
+      "ALL": "Open"
     }
   },
   "EMAIL_TRANSCRIPT": {

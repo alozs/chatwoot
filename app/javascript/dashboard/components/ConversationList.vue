@@ -54,6 +54,58 @@ const loadMoreConversations = () => {
 
 provide('toggleContextMenu', onContextMenuToggle);
 
+// Sequencias do mesmo remetente na mesma caixa (oito avisos seguidos do
+// Railway, por exemplo) colapsam na mais recente, com um botao para abrir o
+// resto. So agrupa itens consecutivos, entao a ordenacao por atividade se
+// mantem.
+const expandedGroups = ref(new Set());
+
+const toggleGroup = key => {
+  const next = new Set(expandedGroups.value);
+  if (next.has(key)) next.delete(key);
+  else next.add(key);
+  expandedGroups.value = next;
+};
+
+const displayList = computed(() => {
+  const list = props.conversationList;
+  const out = [];
+  let i = 0;
+  while (i < list.length) {
+    const current = list[i];
+    const senderId = current?.meta?.sender?.id;
+    let j = i + 1;
+    while (
+      senderId &&
+      j < list.length &&
+      list[j]?.meta?.sender?.id === senderId &&
+      list[j]?.inbox_id === current.inbox_id
+    ) {
+      j += 1;
+    }
+    const size = j - i;
+    const key = `${senderId}-${current.inbox_id}`;
+    if (size > 1 && !expandedGroups.value.has(key)) {
+      out.push({
+        conversation: current,
+        groupKey: key,
+        hiddenCount: size - 1,
+        senderName: current?.meta?.sender?.name || '',
+      });
+    } else {
+      for (let k = i; k < j; k += 1) {
+        out.push({
+          conversation: list[k],
+          groupKey: size > 1 && k === j - 1 ? key : null,
+          collapseAfter: size > 1 && k === j - 1,
+        });
+      }
+    }
+    i = j;
+  }
+  return out;
+});
+
 defineExpose({ conversationListRef });
 </script>
 
@@ -66,18 +118,39 @@ defineExpose({ conversationListRef });
     <Virtualizer
       ref="virtualListRef"
       v-slot="{ item }"
-      :data="conversationList"
+      :data="displayList"
       class="[&>div:has(+_div_.active)>*]:!border-n-surface-1 [&>div:has(+_div_.selected)>*]:!border-n-surface-1"
     >
-      <ConversationItem
-        :source="item"
-        :label="label"
-        :team-id="teamId"
-        :folders-id="foldersId"
-        :conversation-type="conversationType"
-        :show-assignee="showAssignee"
-        :show-expanded="showExpandedCards"
-      />
+      <div>
+        <ConversationItem
+          :source="item.conversation"
+          :label="label"
+          :team-id="teamId"
+          :folders-id="foldersId"
+          :conversation-type="conversationType"
+          :show-assignee="showAssignee"
+          :show-expanded="showExpandedCards"
+        />
+        <button
+          v-if="item.hiddenCount"
+          class="w-full py-1 text-xs text-center cursor-pointer text-n-slate-11 hover:text-n-slate-12 bg-n-alpha-1 hover:bg-n-alpha-2"
+          @click="toggleGroup(item.groupKey)"
+        >
+          {{
+            $t('CHAT_LIST.GROUP.SHOW_MORE', {
+              count: item.hiddenCount,
+              name: item.senderName,
+            })
+          }}
+        </button>
+        <button
+          v-else-if="item.collapseAfter"
+          class="w-full py-1 text-xs text-center cursor-pointer text-n-slate-11 hover:text-n-slate-12 bg-n-alpha-1 hover:bg-n-alpha-2"
+          @click="toggleGroup(item.groupKey)"
+        >
+          {{ $t('CHAT_LIST.GROUP.COLLAPSE') }}
+        </button>
+      </div>
     </Virtualizer>
     <div v-if="isLoading" class="flex justify-center my-4">
       <Spinner class="text-n-brand" />
