@@ -164,7 +164,14 @@ onBeforeMount(contextMenuActions.close);
       :size="24"
       rounded-full
     />
-    <div class="flex flex-col w-full gap-1 min-w-0">
+    <div class="flex flex-col w-full gap-0.5 min-w-0">
+      <div
+        v-if="inbox?.name"
+        class="flex items-center gap-1 text-xs text-n-slate-10"
+      >
+        <Icon v-if="inboxIcon" :icon="inboxIcon" class="flex-shrink-0 size-3" />
+        <span class="truncate">{{ inbox.name }}</span>
+      </div>
       <div class="flex items-center justify-between h-5 gap-2">
         <h4 class="min-w-0 truncate" :class="messageClasses.emphasis">
           {{ senderName }}

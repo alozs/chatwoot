@@ -60,8 +60,8 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col w-full gap-1">
-    <div class="flex items-center justify-between w-full gap-2 py-1 h-7">
+  <div class="flex flex-col w-full gap-0.5">
+    <div class="flex items-center justify-between w-full gap-2 h-5">
       <MessagePreview
         :message="lastNonActivityMessage"
         class="flex-1 min-w-0"
@@ -70,7 +70,7 @@ defineExpose({
 
       <div
         v-if="unreadMessagesCount > 0"
-        class="inline-flex items-center justify-center flex-shrink-0 rounded-full size-5 bg-n-brand"
+        class="inline-flex items-center justify-center flex-shrink-0 rounded-full size-4 bg-n-brand"
       >
         <span class="text-xs font-semibold text-white">
           {{ unreadMessagesCount }}
@@ -79,7 +79,7 @@ defineExpose({
     </div>
 
     <div
-      class="grid items-center gap-2.5 h-7"
+      class="grid items-center gap-2.5 h-6 empty:hidden"
       :class="
         hasSlaThreshold && hasLabels
           ? 'grid-cols-[auto_auto_1fr_20px]'
