@@ -317,6 +317,35 @@ function sortByUnreadStatus(conversations) {
   });
 }
 
+// Filtro instantaneo sobre as conversas ja carregadas: nome, e-mail,
+// telefone, assunto e ultima mensagem. E diferente da busca global da
+// lateral, que vai ao servidor e abre outra tela.
+const quickFilter = ref('');
+
+const normalize = value =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const matchesQuickFilter = conversation => {
+  const term = normalize(quickFilter.value).trim();
+  if (!term) return true;
+  const sender = conversation?.meta?.sender || {};
+  const lastMessage =
+    conversation?.messages?.[conversation.messages.length - 1];
+  const haystack = [
+    sender.name,
+    sender.email,
+    sender.phone_number,
+    conversation?.additional_attributes?.mail_subject,
+    lastMessage?.content,
+  ]
+    .map(normalize)
+    .join(' ');
+  return haystack.includes(term);
+};
+
 const conversationList = computed(() => {
   let localConversationList = [];
 
@@ -353,7 +382,7 @@ const conversationList = computed(() => {
     localConversationList = sortByUnreadStatus(localConversationList);
   }
 
-  return localConversationList;
+  return localConversationList.filter(matchesQuickFilter);
 });
 
 const showEndOfListMessage = computed(() => {
@@ -972,6 +1001,17 @@ watch(conversationFilters, (newVal, oldVal) => {
       is-compact
       @chat-tab-change="updateAssigneeTab"
     />
+    <div class="relative px-3 py-2 border-b border-n-weak">
+      <span
+        class="absolute z-10 i-lucide-search size-3.5 text-n-slate-10 top-1/2 -translate-y-1/2 ltr:left-[1.375rem] rtl:right-[1.375rem] pointer-events-none"
+      />
+      <input
+        v-model="quickFilter"
+        type="search"
+        :placeholder="$t('CHAT_LIST.QUICK_FILTER_PLACEHOLDER')"
+        class="w-full !h-8 !py-0 !text-sm !rounded-lg !bg-n-alpha-1 !border-0 !shadow-none outline-none focus:!bg-n-solid-1 focus:outline focus:outline-1 focus:outline-n-weak !text-n-slate-12 placeholder:text-n-slate-10 ltr:!pl-8 rtl:!pr-8 ltr:!pr-2 rtl:!pl-2 !mb-0"
+      />
+    </div>
 
     <p
       v-if="!chatListLoading && !conversationList.length"

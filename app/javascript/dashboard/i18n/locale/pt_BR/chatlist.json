@@ -150,6 +150,7 @@
     "GROUP": {
       "SHOW_MORE": "Mostrar mais {count} de {name}",
       "COLLAPSE": "Recolher conversas do mesmo remetente"
-    }
+    },
+    "QUICK_FILTER_PLACEHOLDER": "Filtrar conversas carregadas…"
   }
 }

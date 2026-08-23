@@ -150,6 +150,7 @@
     "GROUP": {
       "SHOW_MORE": "Show {count} more from {name}",
       "COLLAPSE": "Collapse conversations from this sender"
-    }
+    },
+    "QUICK_FILTER_PLACEHOLDER": "Filter loaded conversations…"
   }
 }
