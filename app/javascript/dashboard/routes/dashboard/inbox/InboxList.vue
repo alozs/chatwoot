@@ -234,19 +234,17 @@ onMounted(() => {
       />
       <div
         ref="notificationList"
-        class="flex flex-col gap-0.5 w-full h-[calc(100%-56px)] pb-4 overflow-x-hidden px-2 overflow-y-auto divide-y divide-n-weak [&>*:hover]:!border-y-transparent [&>*.active]:!border-y-transparent [&>*:hover+*]:!border-t-transparent [&>*.active+*]:!border-t-transparent"
+        class="flex flex-col w-full h-[calc(100%-56px)] pb-4 overflow-x-hidden overflow-y-auto"
       >
         <InboxCard
           v-for="notificationItem in notifications"
           :key="notificationItem.id"
           :inbox-item="notificationItem"
           :state-inbox="stateInbox(notificationItem.primaryActor?.inboxId)"
-          class="inbox-card rounded-none hover:rounded-lg hover:bg-n-alpha-1 dark:hover:bg-n-alpha-3"
-          :class="
+          :is-active="
             currentConversationId === notificationItem.primaryActor?.id
-              ? 'bg-n-alpha-1 dark:bg-n-alpha-3 !rounded-lg active'
-              : ''
           "
+          class="inbox-card"
           @mark-notification-as-read="markNotificationAsRead"
           @mark-notification-as-un-read="markNotificationAsUnRead"
           @delete-notification="deleteNotification"
