@@ -1,6 +1,8 @@
 <script setup>
-import { computed, onUnmounted } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { useToggle } from '@vueuse/core';
+import { useAdmin } from 'dashboard/composables/useAdmin';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { useStore } from 'vuex';
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
@@ -10,7 +12,7 @@ import ResolveAction from '../../buttons/ResolveAction.vue';
 import ButtonV4 from 'dashboard/components-next/button/Button.vue';
 import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
 
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   CMD_MUTE_CONVERSATION,
   CMD_SEND_TRANSCRIPT,
@@ -33,6 +35,29 @@ const currentChat = computed(() => store.getters.getSelectedChat);
 // barra. As acoes da notificacao vem para ca; o InboxItemHeader continua
 // dono da logica e do modal, e responde pelos eventos abaixo.
 const route = useRoute();
+
+const router = useRouter();
+const { isAdmin } = useAdmin();
+
+// Excluir tambem daqui: o caminho ja existia no menu de contexto do card,
+// mas com a conversa aberta o unico menu a mao e este.
+const deleteConversationDialogRef = ref(null);
+
+const confirmDeleteConversation = async () => {
+  try {
+    await store.dispatch('deleteConversation', currentChat.value.id);
+    deleteConversationDialogRef.value?.close();
+    useAlert(t('CONVERSATION.SUCCESS_DELETE_CONVERSATION'));
+    const accountId = route.params.accountId;
+    if (route.name?.startsWith('inbox_view')) {
+      router.push({ name: 'inbox_view', params: { accountId } });
+    } else {
+      router.push({ path: `/app/accounts/${accountId}/dashboard` });
+    }
+  } catch {
+    useAlert(t('CONVERSATION.FAIL_DELETE_CONVERSATION'));
+  }
+};
 const isInboxView = computed(() => route.name === 'inbox_view');
 
 // As abas dos Dashboard Apps ocupavam uma faixa propria de 40px acima das
@@ -105,6 +130,15 @@ const actionMenuItems = computed(() => {
     value: 'send_transcript',
   });
 
+  if (isAdmin.value) {
+    items.push({
+      icon: 'i-lucide-trash-2',
+      label: t('CONVERSATION.CARD_CONTEXT_MENU.DELETE'),
+      action: 'delete-conversation',
+      value: 'delete-conversation',
+    });
+  }
+
   return [
     ...items,
     ...dashboardAppMenuItems.value,
@@ -127,6 +161,8 @@ const handleActionClick = ({ action }) => {
     emitter.emit(CMD_SNOOZE_NOTIFICATION);
   } else if (action === 'delete-notification') {
     emitter.emit(CMD_DELETE_NOTIFICATION);
+  } else if (action === 'delete-conversation') {
+    deleteConversationDialogRef.value?.open();
   } else if (action.startsWith('dashboard-app-')) {
     emitter.emit(
       CMD_SET_DASHBOARD_APP_TAB,
@@ -183,6 +219,18 @@ onUnmounted(() => {
         @action="handleActionClick"
       />
     </div>
+    <Dialog
+      ref="deleteConversationDialogRef"
+      type="alert"
+      :title="
+        $t('CONVERSATION.DELETE_CONVERSATION.TITLE', {
+          conversationId: currentChat.id,
+        })
+      "
+      :description="$t('CONVERSATION.DELETE_CONVERSATION.DESCRIPTION')"
+      :confirm-button-label="$t('CONVERSATION.DELETE_CONVERSATION.CONFIRM')"
+      @confirm="confirmDeleteConversation"
+    />
     <EmailTranscriptModal
       v-if="showEmailActionsModal"
       :show="showEmailActionsModal"
