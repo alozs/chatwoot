@@ -90,6 +90,14 @@
         "COOKIES": "Third-party cookies must be enabled",
         "ADMIN_ACCESS": "You need admin access to the WhatsApp Business Account"
       }
+    },
+    "BULK": {
+      "SELECTED": "{count} selected | {count} selected",
+      "MARK_READ": "Mark as read",
+      "DELETE": "Delete",
+      "CLEAR": "Clear",
+      "MARKED_READ": "{count} notification marked as read | {count} notifications marked as read",
+      "DELETED": "{count} notification deleted | {count} notifications deleted"
     }
   }
 }

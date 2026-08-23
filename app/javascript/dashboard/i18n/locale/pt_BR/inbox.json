@@ -90,6 +90,14 @@
         "COOKIES": "_Cookies_ de terceiros devem estar habilitados",
         "ADMIN_ACCESS": "Você precisa de acesso de administrador na conta do WhatsApp Business"
       }
+    },
+    "BULK": {
+      "SELECTED": "{count} selecionada | {count} selecionadas",
+      "MARK_READ": "Marcar como lidas",
+      "DELETE": "Excluir",
+      "CLEAR": "Limpar",
+      "MARKED_READ": "{count} notificação marcada como lida | {count} notificações marcadas como lidas",
+      "DELETED": "{count} notificação excluída | {count} notificações excluídas"
     }
   }
 }

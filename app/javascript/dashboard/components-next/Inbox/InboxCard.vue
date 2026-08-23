@@ -10,6 +10,7 @@ const props = defineProps({
   inboxItem: { type: Object, default: () => ({}) },
   stateInbox: { type: Object, default: () => ({}) },
   isActive: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false },
 });
 
 const emit = defineEmits([
@@ -19,6 +20,8 @@ const emit = defineEmits([
   'markNotificationAsRead',
   'markNotificationAsUnRead',
   'deleteNotification',
+  'select',
+  'deselect',
 ]);
 
 const { t } = useI18n();
@@ -85,7 +88,10 @@ onBeforeMount(contextMenuActions.close);
       :assignee="conversationForCard.meta?.assignee || {}"
       :inbox="inbox"
       :is-active-chat="isActive"
+      :selected="selected"
       show-inbox-name
+      @select-conversation="emit('select', inboxItem.id)"
+      @de-select-conversation="emit('deselect', inboxItem.id)"
       @click="emit('click')"
       @contextmenu="contextMenuActions.open($event)"
     />

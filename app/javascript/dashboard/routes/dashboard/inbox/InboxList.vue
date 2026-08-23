@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { groupConsecutive } from 'dashboard/helper/groupConsecutive';
+import NextButton from 'dashboard/components-next/button/Button.vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -101,6 +102,59 @@ const scrollActiveIntoView = () => {
 const redirectToInbox = () => {
   if (route.name === 'inbox_view') return;
   router.replace({ name: 'inbox_view' });
+};
+
+// Selecao multipla: a checkbox que aparece ao passar o mouse no avatar e a
+// mesma da lista de conversas. Aqui ela alimenta uma barra de acoes em massa.
+const selectedIds = ref(new Set());
+const selectedCount = computed(() => selectedIds.value.size);
+const isSelected = id => selectedIds.value.has(id);
+const selectNotification = id => {
+  selectedIds.value = new Set([...selectedIds.value, id]);
+};
+const deselectNotification = id => {
+  const next = new Set(selectedIds.value);
+  next.delete(id);
+  selectedIds.value = next;
+};
+const clearSelection = () => {
+  selectedIds.value = new Set();
+};
+const selectedItems = () =>
+  notifications.value.filter(n => selectedIds.value.has(n.id));
+
+const bulkMarkAsRead = async () => {
+  const items = selectedItems().filter(n => !n.readAt);
+  await Promise.allSettled(
+    items.map(n =>
+      store.dispatch('notifications/read', {
+        id: n.id,
+        primaryActorId: n.primaryActorId,
+        primaryActorType: n.primaryActorType,
+        unreadCount: meta.value.unreadCount,
+      })
+    )
+  );
+  store.dispatch('notifications/unReadCount');
+  clearSelection();
+  useAlert(t('INBOX.BULK.MARKED_READ', { count: items.length }, items.length));
+};
+
+const bulkDelete = async () => {
+  const items = selectedItems();
+  redirectToInbox();
+  await Promise.allSettled(
+    items.map(n =>
+      store.dispatch('notifications/delete', {
+        notification: n,
+        unread_count: meta.value.unreadCount,
+        count: meta.value.count,
+      })
+    )
+  );
+  store.dispatch('notifications/unReadCount');
+  clearSelection();
+  useAlert(t('INBOX.BULK.DELETED', { count: items.length }, items.length));
 };
 
 const loadMoreNotifications = () => {
@@ -257,15 +311,55 @@ onMounted(() => {
         @redirect="redirectToInbox"
       />
       <div
+        v-if="selectedCount"
+        class="flex items-center gap-1 px-3 py-1.5 text-xs border-b border-n-weak bg-n-solid-1"
+      >
+        <span class="font-medium truncate text-n-slate-12 tabular-nums">
+          {{
+            $t('INBOX.BULK.SELECTED', { count: selectedCount }, selectedCount)
+          }}
+        </span>
+        <div class="flex items-center gap-0.5 ltr:ml-auto rtl:mr-auto">
+          <NextButton
+            v-tooltip.bottom="$t('INBOX.BULK.MARK_READ')"
+            icon="i-lucide-check-check"
+            ghost
+            xs
+            slate
+            @click="bulkMarkAsRead"
+          />
+          <NextButton
+            v-tooltip.bottom="$t('INBOX.BULK.DELETE')"
+            icon="i-lucide-trash-2"
+            ghost
+            xs
+            class="!text-n-ruby-11"
+            @click="bulkDelete"
+          />
+          <NextButton
+            v-tooltip.bottom="$t('INBOX.BULK.CLEAR')"
+            icon="i-lucide-x"
+            ghost
+            xs
+            slate
+            @click="clearSelection"
+          />
+        </div>
+      </div>
+      <div
         ref="notificationList"
-        class="flex flex-col w-full h-[calc(100%-56px)] pb-4 overflow-x-hidden overflow-y-auto"
+        class="flex flex-col w-full pb-4 overflow-x-hidden overflow-y-auto"
+        :class="selectedCount ? 'h-[calc(100%-96px)]' : 'h-[calc(100%-56px)]'"
       >
         <template v-for="entry in groupedNotifications" :key="entry.item.id">
           <InboxCard
             :inbox-item="entry.item"
             :state-inbox="stateInbox(entry.item.primaryActor?.inboxId)"
             :is-active="currentConversationId === entry.item.primaryActor?.id"
+            :selected="isSelected(entry.item.id)"
             class="inbox-card"
+            @select="selectNotification"
+            @deselect="deselectNotification"
             @mark-notification-as-read="markNotificationAsRead"
             @mark-notification-as-un-read="markNotificationAsUnRead"
             @delete-notification="deleteNotification"
