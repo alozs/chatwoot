@@ -157,7 +157,7 @@ onBeforeMount(contextMenuActions.close);
   <div
     role="button"
     class="flex flex-col w-full gap-1 px-3 py-2.5 transition-colors duration-150 ease-out cursor-pointer"
-    :class="isUnread ? 'bg-n-solid-1' : 'bg-transparent'"
+    :class="isUnread ? 'bg-n-blue-2' : 'bg-n-solid-1'"
     @contextmenu="contextMenuActions.open($event)"
     @click="emit('click')"
   >

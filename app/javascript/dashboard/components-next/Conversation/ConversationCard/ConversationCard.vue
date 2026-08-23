@@ -37,6 +37,10 @@ const cardMessagePreviewWithMetaRef = ref(null);
 
 const currentContact = computed(() => props.contact);
 
+// Cor com significado: azul fraco marca o que ainda nao foi lido, branco o
+// que ja foi. E o unico fundo colorido da lista.
+const hasUnread = computed(() => (props.conversation?.unread_count ?? 0) > 0);
+
 const currentContactName = computed(() => currentContact.value?.name);
 const currentContactThumbnail = computed(() => currentContact.value?.thumbnail);
 const currentContactStatus = computed(
@@ -93,6 +97,7 @@ const onCardClick = e => {
   <div
     role="button"
     class="flex w-full gap-2.5 px-3 py-2.5 transition-colors duration-150 ease-out cursor-pointer"
+    :class="hasUnread ? 'bg-n-blue-2' : 'bg-n-solid-1'"
     @click="onCardClick"
   >
     <Avatar
