@@ -40,8 +40,8 @@ const slaCardLabel = ref(null);
 const getMessageClasses = {
   emphasis: 'text-[13px] font-medium text-n-slate-10',
   emphasisUnread: 'text-[13px] font-semibold text-n-slate-12',
-  normal: 'text-xs font-normal text-n-slate-10',
-  normalUnread: 'text-xs font-normal text-n-slate-12',
+  normal: 'text-xs font-normal text-n-slate-10 block truncate',
+  normalUnread: 'text-xs font-normal text-n-slate-12 block truncate',
 };
 
 const primaryActor = computed(() => props.inboxItem?.primaryActor);
@@ -161,17 +161,16 @@ onBeforeMount(contextMenuActions.close);
     @contextmenu="contextMenuActions.open($event)"
     @click="emit('click')"
   >
-    <div class="flex items-start gap-2">
+    <div class="flex items-center gap-2">
       <Avatar
         :name="assigneeMeta.name"
         :src="assigneeMeta.thumbnail"
         :size="20"
         rounded-full
-        class="mt-1"
       />
       <p
         v-dompurify-html="formattedMessage"
-        class="min-w-0 mb-0 line-clamp-3"
+        class="min-w-0 mb-0 line-clamp-2"
       />
     </div>
     <div class="flex items-center justify-between h-5 gap-2">
