@@ -39,7 +39,11 @@ const currentContact = computed(() => props.contact);
 
 // Cor com significado: azul fraco marca o que ainda nao foi lido, branco o
 // que ja foi. E o unico fundo colorido da lista.
-const hasUnread = computed(() => (props.conversation?.unread_count ?? 0) > 0);
+const hasUnread = computed(() => {
+  const { unreadCount, unread_count: unreadCountSnake } =
+    props.conversation ?? {};
+  return (unreadCount ?? unreadCountSnake ?? 0) > 0;
+});
 
 const currentContactName = computed(() => currentContact.value?.name);
 const currentContactThumbnail = computed(() => currentContact.value?.thumbnail);

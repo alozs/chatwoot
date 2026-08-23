@@ -166,14 +166,7 @@ onBeforeMount(contextMenuActions.close);
     />
     <div class="flex flex-col w-full gap-1 min-w-0">
       <div class="flex items-center justify-between h-5 gap-2">
-        <h4
-          class="flex items-center min-w-0 gap-1.5 truncate"
-          :class="messageClasses.emphasis"
-        >
-          <span
-            v-if="isUnread"
-            class="inline-flex flex-shrink-0 rounded-full size-2 bg-n-slate-12"
-          />
+        <h4 class="min-w-0 truncate" :class="messageClasses.emphasis">
           {{ senderName }}
         </h4>
         <div class="flex items-center flex-shrink-0 gap-2">
@@ -216,11 +209,11 @@ onBeforeMount(contextMenuActions.close);
           <div
             v-if="inboxIcon"
             v-tooltip.left="inbox?.name"
-            class="flex items-center justify-center flex-shrink-0 rounded-full bg-n-alpha-2 size-4"
+            class="flex items-center justify-center flex-shrink-0 rounded-full bg-n-alpha-2 size-5"
           >
             <Icon
               :icon="inboxIcon"
-              class="flex-shrink-0 text-n-slate-11 size-2.5"
+              class="flex-shrink-0 text-n-slate-11 size-3"
             />
           </div>
           <span class="text-xs text-n-slate-10">
