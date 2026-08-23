@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
+import { groupConsecutive } from 'dashboard/helper/groupConsecutive';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -57,6 +58,29 @@ const showEndOfList = computed(() => {
 const showEmptyState = computed(() => {
   return !uiFlags.value.isFetching && !notifications.value.length;
 });
+
+// Mesmo agrupamento da lista de conversas: sequencias do mesmo remetente na
+// mesma caixa colapsam na mais recente.
+const expandedGroups = ref(new Set());
+const toggleGroup = key => {
+  const next = new Set(expandedGroups.value);
+  if (next.has(key)) next.delete(key);
+  else next.add(key);
+  expandedGroups.value = next;
+};
+const groupedNotifications = computed(() =>
+  groupConsecutive(
+    notifications.value,
+    {
+      keyOf: n => {
+        const senderId = n?.primaryActor?.meta?.sender?.id;
+        return senderId ? `${senderId}-${n.primaryActor?.inboxId}` : null;
+      },
+      nameOf: n => n?.primaryActor?.meta?.sender?.name || '',
+    },
+    expandedGroups.value
+  )
+);
 
 const stateInbox = inboxId => {
   return inboxById.value(inboxId);
@@ -236,22 +260,39 @@ onMounted(() => {
         ref="notificationList"
         class="flex flex-col w-full h-[calc(100%-56px)] pb-4 overflow-x-hidden overflow-y-auto"
       >
-        <InboxCard
-          v-for="notificationItem in notifications"
-          :key="notificationItem.id"
-          :inbox-item="notificationItem"
-          :state-inbox="stateInbox(notificationItem.primaryActor?.inboxId)"
-          :is-active="
-            currentConversationId === notificationItem.primaryActor?.id
-          "
-          class="inbox-card"
-          @mark-notification-as-read="markNotificationAsRead"
-          @mark-notification-as-un-read="markNotificationAsUnRead"
-          @delete-notification="deleteNotification"
-          @context-menu-open="isInboxContextMenuOpen = true"
-          @context-menu-close="isInboxContextMenuOpen = false"
-          @click="openConversation(notificationItem)"
-        />
+        <template v-for="entry in groupedNotifications" :key="entry.item.id">
+          <InboxCard
+            :inbox-item="entry.item"
+            :state-inbox="stateInbox(entry.item.primaryActor?.inboxId)"
+            :is-active="currentConversationId === entry.item.primaryActor?.id"
+            class="inbox-card"
+            @mark-notification-as-read="markNotificationAsRead"
+            @mark-notification-as-un-read="markNotificationAsUnRead"
+            @delete-notification="deleteNotification"
+            @context-menu-open="isInboxContextMenuOpen = true"
+            @context-menu-close="isInboxContextMenuOpen = false"
+            @click="openConversation(entry.item)"
+          />
+          <button
+            v-if="entry.hiddenCount"
+            class="w-full py-1 text-xs text-center cursor-pointer text-n-slate-11 hover:text-n-slate-12 bg-n-alpha-1 hover:bg-n-alpha-2"
+            @click="toggleGroup(entry.groupKey)"
+          >
+            {{
+              $t('CHAT_LIST.GROUP.SHOW_MORE', {
+                count: entry.hiddenCount,
+                name: entry.senderName,
+              })
+            }}
+          </button>
+          <button
+            v-else-if="entry.collapseAfter"
+            class="w-full py-1 text-xs text-center cursor-pointer text-n-slate-11 hover:text-n-slate-12 bg-n-alpha-1 hover:bg-n-alpha-2"
+            @click="toggleGroup(entry.groupKey)"
+          >
+            {{ $t('CHAT_LIST.GROUP.COLLAPSE') }}
+          </button>
+        </template>
         <div v-if="uiFlags.isFetching" class="flex justify-center my-4">
           <Spinner class="text-n-brand" />
         </div>

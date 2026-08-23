@@ -35,7 +35,10 @@ const conversationForCard = computed(() =>
   snakecaseKeys(primaryActor.value || {}, { deep: true })
 );
 const isUnread = computed(() => !props.inboxItem?.readAt);
-const inbox = computed(() => props.stateInbox);
+// getInboxById devolve camelCase; o ChannelIcon le channel_type.
+const inbox = computed(() =>
+  snakecaseKeys(props.stateInbox || {}, { deep: true })
+);
 
 const menuItems = computed(() => [
   {

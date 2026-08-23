@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, provide } from 'vue';
+import { groupConsecutive } from 'dashboard/helper/groupConsecutive';
 import { Virtualizer } from 'virtua/vue';
 import { useBreakpoints } from '@vueuse/core';
 import { useChatListKeyboardEvents } from 'dashboard/composables/chatlist/useChatListKeyboardEvents';
@@ -67,44 +68,19 @@ const toggleGroup = key => {
   expandedGroups.value = next;
 };
 
-const displayList = computed(() => {
-  const list = props.conversationList;
-  const out = [];
-  let i = 0;
-  while (i < list.length) {
-    const current = list[i];
-    const senderId = current?.meta?.sender?.id;
-    let j = i + 1;
-    while (
-      senderId &&
-      j < list.length &&
-      list[j]?.meta?.sender?.id === senderId &&
-      list[j]?.inbox_id === current.inbox_id
-    ) {
-      j += 1;
-    }
-    const size = j - i;
-    const key = `${senderId}-${current.inbox_id}`;
-    if (size > 1 && !expandedGroups.value.has(key)) {
-      out.push({
-        conversation: current,
-        groupKey: key,
-        hiddenCount: size - 1,
-        senderName: current?.meta?.sender?.name || '',
-      });
-    } else {
-      for (let k = i; k < j; k += 1) {
-        out.push({
-          conversation: list[k],
-          groupKey: size > 1 && k === j - 1 ? key : null,
-          collapseAfter: size > 1 && k === j - 1,
-        });
-      }
-    }
-    i = j;
-  }
-  return out;
-});
+const displayList = computed(() =>
+  groupConsecutive(
+    props.conversationList,
+    {
+      keyOf: c => {
+        const senderId = c?.meta?.sender?.id;
+        return senderId ? `${senderId}-${c.inbox_id}` : null;
+      },
+      nameOf: c => c?.meta?.sender?.name || '',
+    },
+    expandedGroups.value
+  )
+);
 
 defineExpose({ conversationListRef });
 </script>
@@ -123,7 +99,7 @@ defineExpose({ conversationListRef });
     >
       <div>
         <ConversationItem
-          :source="item.conversation"
+          :source="item.item"
           :label="label"
           :team-id="teamId"
           :folders-id="foldersId"
