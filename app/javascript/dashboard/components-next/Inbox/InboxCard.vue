@@ -82,22 +82,19 @@ const messageClasses = computed(() => ({
     : getMessageClasses.normal,
 }));
 
-const formatPushMessage = message => {
-  if (message.startsWith(': ')) {
-    return message.slice(2);
-  }
+// pushMessageBody chega como "remetente: conteudo". Separar os dois permite
+// o mesmo layout do card de conversa: nome e hora na primeira linha, previa
+// na segunda.
+const senderName = computed(() => {
+  const body = props.inboxItem?.pushMessageBody || '';
+  const [name] = body.split(':');
+  return body.includes(':') ? name.trim() : '';
+});
 
-  return message.replace(/^([^:]+):/g, (match, name) => {
-    return `<span class="${messageClasses.value.emphasis} block truncate">${name}</span>`;
-  });
-};
-
-const formattedMessage = computed(() => {
-  const messageContent = `<span class="${messageClasses.value.normal}">${formatPushMessage(props.inboxItem?.pushMessageBody || '')}</span>`;
-
-  return isUnread.value
-    ? `<span class="inline-flex flex-shrink-0 w-2 h-2 mb-px rounded-full bg-n-slate-12 ltr:mr-1.5 rtl:ml-1.5"></span> ${messageContent}`
-    : messageContent;
+const previewText = computed(() => {
+  const body = props.inboxItem?.pushMessageBody || '';
+  const idx = body.indexOf(':');
+  return (idx === -1 ? body : body.slice(idx + 1)).trim();
 });
 
 const notificationDetails = computed(() => {
@@ -156,92 +153,84 @@ onBeforeMount(contextMenuActions.close);
 <template>
   <div
     role="button"
-    class="flex flex-col w-full gap-1 px-3 py-2.5 transition-colors duration-150 ease-out cursor-pointer"
+    class="flex w-full gap-2.5 px-3 py-2.5 transition-colors duration-150 ease-out cursor-pointer"
     :class="isUnread ? 'bg-n-blue-2' : 'bg-n-solid-1'"
     @contextmenu="contextMenuActions.open($event)"
     @click="emit('click')"
   >
-    <div class="flex items-center gap-2">
-      <Avatar
-        :name="assigneeMeta.name"
-        :src="assigneeMeta.thumbnail"
-        :size="20"
-        rounded-full
-      />
-      <p
-        v-dompurify-html="formattedMessage"
-        class="min-w-0 mb-0 line-clamp-2"
-      />
-    </div>
-    <div class="flex items-center justify-between h-5 gap-2">
-      <div class="flex items-center flex-1 min-w-0 gap-1">
-        <div
-          v-if="snoozedUntilTime || hasLastSnoozed"
-          class="flex items-center w-full min-w-0 gap-2 ltr:pl-1 rtl:pr-1"
+    <Avatar
+      :name="assigneeMeta.name"
+      :src="assigneeMeta.thumbnail"
+      :size="24"
+      rounded-full
+    />
+    <div class="flex flex-col w-full gap-1 min-w-0">
+      <div class="flex items-center justify-between h-5 gap-2">
+        <h4
+          class="flex items-center min-w-0 gap-1.5 truncate"
+          :class="messageClasses.emphasis"
         >
+          <span
+            v-if="isUnread"
+            class="inline-flex flex-shrink-0 rounded-full size-2 bg-n-slate-12"
+          />
+          {{ senderName }}
+        </h4>
+        <div class="flex items-center flex-shrink-0 gap-2">
           <Icon
+            v-if="snoozedUntilTime || hasLastSnoozed"
+            v-tooltip.left="snoozedText"
             :icon="
               !hasLastSnoozed
                 ? 'i-lucide-alarm-clock-plus'
                 : 'i-lucide-alarm-clock-off'
             "
-            class="flex-shrink-0 size-4"
-            :class="!isUnread ? 'text-n-slate-11' : 'text-n-blue-11'"
+            class="flex-shrink-0 text-n-slate-11 size-3.5"
           />
-          <span
-            class="text-xs font-medium truncate"
-            :class="!isUnread ? 'text-n-slate-11' : 'text-n-blue-11'"
-          >
-            {{ snoozedText }}
-          </span>
-        </div>
-        <div
-          v-else-if="notificationDetails.text"
-          class="flex items-center w-full min-w-0 gap-2 ltr:pl-1 rtl:pr-1"
-        >
           <Icon
+            v-else-if="notificationDetails.icon"
+            v-tooltip.left="notificationDetails.text"
             :icon="notificationDetails.icon"
+            class="flex-shrink-0 size-3.5"
             :class="isUnread ? notificationDetails.color : 'text-n-slate-11'"
-            class="flex-shrink-0 size-4"
           />
-          <span
-            class="text-xs font-medium truncate"
-            :class="isUnread ? notificationDetails.color : 'text-n-slate-11'"
+          <SLACardLabel
+            v-show="hasSlaThreshold"
+            ref="slaCardLabel"
+            :conversation="primaryActor"
+            class="[&>span]:text-xs"
+            :class="
+              !isUnread &&
+              '[&>span]:text-n-slate-11 [&>div>svg]:fill-n-slate-11'
+            "
+          />
+          <div
+            v-if="hasSlaThreshold"
+            class="w-px h-3 rounded-sm bg-n-slate-4"
+          />
+          <CardPriorityIcon
+            v-if="primaryActor?.priority"
+            :priority="primaryActor?.priority"
+            class="[&>svg]:size-4"
+          />
+          <div
+            v-if="inboxIcon"
+            v-tooltip.left="inbox?.name"
+            class="flex items-center justify-center flex-shrink-0 rounded-full bg-n-alpha-2 size-4"
           >
-            {{ notificationDetails.text }}
+            <Icon
+              :icon="inboxIcon"
+              class="flex-shrink-0 text-n-slate-11 size-2.5"
+            />
+          </div>
+          <span class="text-xs text-n-slate-10">
+            {{ lastActivityAt }}
           </span>
         </div>
       </div>
-      <div class="flex items-center flex-shrink-0 gap-2">
-        <SLACardLabel
-          v-show="hasSlaThreshold"
-          ref="slaCardLabel"
-          :conversation="primaryActor"
-          class="[&>span]:text-xs"
-          :class="
-            !isUnread && '[&>span]:text-n-slate-11 [&>div>svg]:fill-n-slate-11'
-          "
-        />
-        <div v-if="hasSlaThreshold" class="w-px h-3 rounded-sm bg-n-slate-4" />
-        <CardPriorityIcon
-          v-if="primaryActor?.priority"
-          :priority="primaryActor?.priority"
-          class="[&>svg]:size-4"
-        />
-        <div
-          v-if="inboxIcon"
-          v-tooltip.left="inbox?.name"
-          class="flex items-center justify-center flex-shrink-0 rounded-full bg-n-alpha-2 size-4"
-        >
-          <Icon
-            :icon="inboxIcon"
-            class="flex-shrink-0 text-n-slate-11 size-2.5"
-          />
-        </div>
-        <span class="text-xs text-n-slate-10">
-          {{ lastActivityAt }}
-        </span>
-      </div>
+      <p class="mb-0 truncate" :class="messageClasses.normal">
+        {{ previewText }}
+      </p>
     </div>
     <InboxContextMenu
       v-if="isContextMenuOpen"
