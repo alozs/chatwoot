@@ -24,6 +24,7 @@ const emit = defineEmits([
   'resetFilters',
   'basicFilterChange',
   'filtersModal',
+  'refresh',
 ]);
 
 const { uiSettings, updateUISettings } = useUISettings();
@@ -86,6 +87,14 @@ const toggleConversationLayout = () => {
       </span>
     </div>
     <div class="flex items-center gap-1">
+      <NextButton
+        v-tooltip.top-end="$t('INBOX.LIST.REFRESH')"
+        icon="i-lucide-refresh-cw"
+        slate
+        xs
+        faded
+        @click="emit('refresh')"
+      />
       <template v-if="hasAppliedFilters && !hasActiveFolders">
         <div class="relative">
           <NextButton

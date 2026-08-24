@@ -621,6 +621,21 @@ function resetAndFetchData() {
   fetchConversations();
 }
 
+// Atualizar recarrega a listagem atual do zero, mantendo filtros e pastas
+// ativos — diferente do resetAndFetchData, que limpa os filtros aplicados.
+function refreshConversations() {
+  resetBulkActions();
+  store.dispatch('conversationPage/reset');
+  store.dispatch('emptyAllConversations');
+  if (hasActiveFolders.value) {
+    fetchSavedFilteredConversations(activeFolder.value.query);
+  } else if (hasAppliedFilters.value) {
+    fetchFilteredConversations(appliedFilters.value);
+  } else {
+    fetchConversations();
+  }
+}
+
 function loadMoreConversations() {
   if (hasCurrentPageEndReached.value || chatListLoading.value) {
     return;
@@ -971,6 +986,7 @@ watch(conversationFilters, (newVal, oldVal) => {
       @filters-modal="onToggleAdvanceFiltersModal"
       @reset-filters="resetAndFetchData"
       @basic-filter-change="onBasicFilterChange"
+      @refresh="refreshConversations"
     />
 
     <TeleportWithDirection
