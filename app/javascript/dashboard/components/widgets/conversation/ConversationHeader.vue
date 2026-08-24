@@ -18,6 +18,7 @@ import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 import { copyTextToClipboard } from 'shared/helpers/clipboard';
 import { downloadFile } from '@chatwoot/utils';
+import { isWhatsappNamedApiInbox } from 'dashboard/components-next/icon/provider';
 
 const props = defineProps({
   chat: {
@@ -76,21 +77,84 @@ const currentContact = computed(() =>
 
 const contactName = computed(() => contactDisplayName(currentContact.value));
 
-// A foto do contato baixa com um clique no avatar. Sem foto anexada (avatar
-// de iniciais) o clique avisa em vez de falhar em silencio.
+const inbox = computed(() => {
+  const { inbox_id: inboxId } = props.chat;
+  return store.getters['inboxes/getInbox'](inboxId);
+});
+
+// Clique no avatar: com foto anexada, baixa o arquivo; sem foto, numa caixa
+// de WhatsApp via ponte, busca a foto no WAHA pelo servico avatar-pull — o
+// mesmo fluxo do dashboard app "Baixar foto", reaproveitando a URL com token
+// ja cadastrada no proprio dashboard app.
 const hasContactPhoto = computed(() =>
   Boolean(currentContact.value?.thumbnail)
 );
 
+const avatarPullApp = computed(() =>
+  (store.getters['dashboardApps/getRecords'] || []).find(app =>
+    /avatar-pull/i.test(app.content?.[0]?.url || '')
+  )
+);
+
+const canPullContactPhoto = computed(() =>
+  Boolean(isWhatsappNamedApiInbox(inbox.value) && avatarPullApp.value)
+);
+
+const avatarActionTooltip = computed(() => {
+  if (hasContactPhoto.value) return t('CONVERSATION.HEADER.DOWNLOAD_PHOTO');
+  if (canPullContactPhoto.value) return t('CONVERSATION.HEADER.PULL_PHOTO');
+  return '';
+});
+
+const isPullingPhoto = ref(false);
+
+const pullContactPhoto = async () => {
+  const appUrl = new URL(avatarPullApp.value.content[0].url);
+  const response = await fetch(`${appUrl.origin}/pull${appUrl.search}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contact_id: currentContact.value.id,
+      conversation_id: currentChat.value.id,
+      force: true,
+    }),
+  });
+  const body = await response.json();
+  if (!response.ok || !body.ok) throw new Error(body.error || 'pull failed');
+};
+
 const downloadContactPhoto = async () => {
-  if (!hasContactPhoto.value) {
+  if (hasContactPhoto.value) {
+    try {
+      await downloadFile({
+        url: currentContact.value.thumbnail,
+        type: 'image',
+      });
+    } catch {
+      useAlert(t('CONVERSATION.HEADER.DOWNLOAD_PHOTO_ERROR'));
+    }
+    return;
+  }
+
+  if (!canPullContactPhoto.value) {
     useAlert(t('CONVERSATION.HEADER.NO_PHOTO_TO_DOWNLOAD'));
     return;
   }
+
+  if (isPullingPhoto.value) return;
+  isPullingPhoto.value = true;
   try {
-    await downloadFile({ url: currentContact.value.thumbnail, type: 'image' });
+    await pullContactPhoto();
+    useAlert(t('CONVERSATION.HEADER.PULL_PHOTO_SUCCESS'));
+    // O anexo roda num job no servidor; rebusca o contato para a miniatura
+    // aparecer sem recarregar o painel.
+    setTimeout(() => {
+      store.dispatch('contacts/show', { id: currentContact.value.id });
+    }, 2000);
   } catch {
-    useAlert(t('CONVERSATION.HEADER.DOWNLOAD_PHOTO_ERROR'));
+    useAlert(t('CONVERSATION.HEADER.PULL_PHOTO_ERROR'));
+  } finally {
+    isPullingPhoto.value = false;
   }
 };
 
@@ -115,11 +179,6 @@ const snoozedDisplayText = computed(() => {
     return `${t('CONVERSATION.HEADER.SNOOZED_UNTIL')} ${snoozedReopenTime(snoozedUntil)}`;
   }
   return t('CONVERSATION.HEADER.SNOOZED_UNTIL_NEXT_REPLY');
-});
-
-const inbox = computed(() => {
-  const { inbox_id: inboxId } = props.chat;
-  return store.getters['inboxes/getInbox'](inboxId);
 });
 
 const hasMultipleInboxes = computed(
@@ -154,12 +213,10 @@ const copyConversationId = async () => {
         class="me-2"
       />
       <button
-        v-tooltip.bottom="
-          hasContactPhoto ? $t('CONVERSATION.HEADER.DOWNLOAD_PHOTO') : ''
-        "
+        v-tooltip.bottom="avatarActionTooltip"
         type="button"
         class="flex flex-shrink-0 !p-0"
-        :class="hasContactPhoto ? 'cursor-pointer' : 'cursor-default'"
+        :class="avatarActionTooltip ? 'cursor-pointer' : 'cursor-default'"
         @click="downloadContactPhoto"
       >
         <Avatar
