@@ -8,6 +8,7 @@ import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 import { emitter } from 'shared/helpers/mitt';
 import EmailTranscriptModal from './EmailTranscriptModal.vue';
+import EditContact from 'dashboard/routes/dashboard/conversation/contact/EditContact.vue';
 import ResolveAction from '../../buttons/ResolveAction.vue';
 import ButtonV4 from 'dashboard/components-next/button/Button.vue';
 import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
@@ -28,8 +29,15 @@ const { t } = useI18n();
 
 const [showEmailActionsModal, toggleEmailModal] = useToggle(false);
 const [showActionsDropdown, toggleDropdown] = useToggle(false);
+const [showEditContactPanel, toggleEditContactPanel] = useToggle(false);
 
 const currentChat = computed(() => store.getters.getSelectedChat);
+
+// Contato do WhatsApp chega so com o numero como nome; este atalho abre a
+// edicao do contato sem precisar do painel lateral.
+const currentContact = computed(() =>
+  store.getters['contacts/getContact'](currentChat.value.meta?.sender?.id)
+);
 
 // Na Caixa de Entrada havia dois menus de tres pontos empilhados, um por
 // barra. As acoes da notificacao vem para ca; o InboxItemHeader continua
@@ -130,6 +138,13 @@ const actionMenuItems = computed(() => {
     value: 'send_transcript',
   });
 
+  items.push({
+    icon: 'i-lucide-user-round-pen',
+    label: t('EDIT_CONTACT.BUTTON_LABEL'),
+    action: 'edit-contact',
+    value: 'edit-contact',
+  });
+
   if (isAdmin.value) {
     items.push({
       icon: 'i-lucide-trash-2',
@@ -157,6 +172,8 @@ const handleActionClick = ({ action }) => {
     useAlert(t('CONTACT_PANEL.UNMUTED_SUCCESS'));
   } else if (action === 'send_transcript') {
     toggleEmailModal();
+  } else if (action === 'edit-contact') {
+    toggleEditContactPanel(true);
   } else if (action === 'snooze-notification') {
     emitter.emit(CMD_SNOOZE_NOTIFICATION);
   } else if (action === 'delete-notification') {
@@ -236,6 +253,11 @@ onUnmounted(() => {
       :show="showEmailActionsModal"
       :current-chat="currentChat"
       @cancel="toggleEmailModal"
+    />
+    <EditContact
+      :show="showEditContactPanel"
+      :contact="currentContact"
+      @cancel="toggleEditContactPanel(false)"
     />
   </div>
 </template>
