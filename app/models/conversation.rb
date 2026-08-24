@@ -124,6 +124,14 @@ class Conversation < ApplicationRecord
   has_one :csat_survey_response, dependent: :destroy_async
   has_many :conversation_participants, dependent: :destroy_async
   has_many :notifications, as: :primary_actor, dependent: :destroy_async
+
+  # Marcar a conversa como nao lida devolve as notificacoes dela a Caixa de
+  # Entrada de quem marcou; sem isso a conversa volta a contar como pendente,
+  # mas a notificacao segue lida e a Caixa de Entrada nao mostra nada.
+  def reopen_notifications_for(user)
+    notifications.where(user: user).update(read_at: nil, last_activity_at: Time.current)
+  end
+
   has_many :attachments, through: :messages
   has_many :reporting_events, dependent: :destroy_async
   has_many :automation_rule_pending_executions, dependent: :delete_all
