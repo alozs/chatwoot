@@ -144,7 +144,7 @@ class Messages::MessageBuilder
       account_id: @conversation.account_id,
       inbox_id: @conversation.inbox_id,
       message_type: message_type,
-      content: Messages::WhatsappAgentSignature.new(@params[:content], @user, @conversation, @private, message_type).call,
+      content: @params[:content],
       private: @private,
       sender: sender,
       content_type: @params[:content_type],
