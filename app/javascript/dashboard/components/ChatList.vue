@@ -32,6 +32,8 @@ import { useEmitter } from 'dashboard/composables/emitter';
 import { useConversationRequiredAttributes } from 'dashboard/composables/useConversationRequiredAttributes';
 
 import { emitter } from 'shared/helpers/mitt';
+import { LocalStorage } from 'shared/helpers/localStorage';
+import { LOCAL_STORAGE_KEYS } from 'dashboard/constants/localStorage';
 
 import wootConstants from 'dashboard/constants/globals';
 import advancedFilterOptions from './widgets/conversation/advancedFilterItems';
@@ -72,7 +74,15 @@ const store = useStore();
 
 const resolveAttributesModalRef = ref(null);
 
-const activeAssigneeTab = ref(wootConstants.ASSIGNEE_TYPE.ME);
+// A aba Minhas/Todos escolhida sobrevive ao recarregamento da pagina.
+const storedAssigneeTab = LocalStorage.get(
+  LOCAL_STORAGE_KEYS.CONVERSATION_ASSIGNEE_TAB
+);
+const activeAssigneeTab = ref(
+  Object.values(wootConstants.ASSIGNEE_TYPE).includes(storedAssigneeTab)
+    ? storedAssigneeTab
+    : wootConstants.ASSIGNEE_TYPE.ME
+);
 const activeStatus = ref(wootConstants.STATUS_TYPE.OPEN);
 const activeSortBy = ref(wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC);
 const showAdvancedFilters = ref(false);
@@ -656,6 +666,7 @@ function updateAssigneeTab(selectedTab) {
     resetBulkActions();
     emitter.emit('clearSearchInput');
     activeAssigneeTab.value = selectedTab;
+    LocalStorage.set(LOCAL_STORAGE_KEYS.CONVERSATION_ASSIGNEE_TAB, selectedTab);
     if (!currentPage.value) {
       fetchConversations();
     }
