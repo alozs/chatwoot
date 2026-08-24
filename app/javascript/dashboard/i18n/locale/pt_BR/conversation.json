@@ -122,6 +122,7 @@
       "MORE_ACTIONS": "Mais ações",
       "DOWNLOAD_PHOTO": "Baixar foto",
       "DOWNLOAD_PHOTO_ERROR": "Não foi possível baixar a foto! Tente novamente",
+      "NO_PHOTO_TO_DOWNLOAD": "Este contato não tem foto para baixar",
       "OPEN": "Mais",
       "CLOSE": "Fechar",
       "DETAILS": "detalhes",

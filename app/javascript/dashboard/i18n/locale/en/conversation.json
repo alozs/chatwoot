@@ -132,6 +132,7 @@
       "MORE_ACTIONS": "More actions",
       "DOWNLOAD_PHOTO": "Download photo",
       "DOWNLOAD_PHOTO_ERROR": "Couldn't download the photo! Try again",
+      "NO_PHOTO_TO_DOWNLOAD": "This contact has no photo to download",
       "OPEN": "More",
       "CLOSE": "Close",
       "DETAILS": "details",

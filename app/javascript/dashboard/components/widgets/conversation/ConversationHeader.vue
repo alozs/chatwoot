@@ -76,14 +76,17 @@ const currentContact = computed(() =>
 
 const contactName = computed(() => contactDisplayName(currentContact.value));
 
-// A foto do contato baixa com um clique no avatar; sem foto o clique nao faz
-// nada e o cursor segue normal.
+// A foto do contato baixa com um clique no avatar. Sem foto anexada (avatar
+// de iniciais) o clique avisa em vez de falhar em silencio.
 const hasContactPhoto = computed(() =>
   Boolean(currentContact.value?.thumbnail)
 );
 
 const downloadContactPhoto = async () => {
-  if (!hasContactPhoto.value) return;
+  if (!hasContactPhoto.value) {
+    useAlert(t('CONVERSATION.HEADER.NO_PHOTO_TO_DOWNLOAD'));
+    return;
+  }
   try {
     await downloadFile({ url: currentContact.value.thumbnail, type: 'image' });
   } catch {
