@@ -11,14 +11,13 @@ export const getters = {
   },
   getFilteredNotificationsV4: $state => filters => {
     const sortOrder = filters.sortOrder === 'desc' ? 'newest' : 'oldest';
-    // O backend so devolve lidas e adiadas quando o filtro inclui 'read' ou
-    // 'snoozed'. Replicar a regra aqui faz a lista reagir na hora: ao abrir
-    // uma notificacao ela some, sem esperar o proximo fetch.
+    // Adiar e uma acao explicita: a notificacao some na hora. Ler nao: ela
+    // continua na lista, marcada como lida, e so sai no proximo recarregamento
+    // ou no botao de atualizar — sumir no clique tirava o item da frente de
+    // quem ainda estava lendo.
     const includes = [filters.status, filters.type].filter(Boolean);
-    const showRead = includes.includes('read');
     const showSnoozed = includes.includes('snoozed');
     const visible = Object.values($state.records).filter(n => {
-      if (!showRead && n.read_at) return false;
       if (!showSnoozed && n.snoozed_until) return false;
       return true;
     });

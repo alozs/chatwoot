@@ -94,6 +94,11 @@ const fetchNotifications = () => {
   store.dispatch('notifications/index', filter);
 };
 
+const onRefresh = () => {
+  fetchNotifications();
+  store.dispatch('notifications/unReadCount');
+};
+
 const scrollActiveIntoView = () => {
   const activeEl = notificationList.value?.querySelector('.inbox-card.active');
   activeEl?.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -309,6 +314,7 @@ onMounted(() => {
         :is-context-menu-open="isInboxContextMenuOpen"
         @filter="onFilterChange"
         @redirect="redirectToInbox"
+        @refresh="onRefresh"
       />
       <div
         v-if="selectedCount"

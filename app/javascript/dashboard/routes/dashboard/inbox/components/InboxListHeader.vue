@@ -18,7 +18,7 @@ export default {
       default: false,
     },
   },
-  emits: ['redirect', 'filter'],
+  emits: ['redirect', 'filter', 'refresh'],
   data() {
     return {
       showInboxDisplayMenu: false,
@@ -105,6 +105,14 @@ export default {
       </div>
     </div>
     <div class="relative flex items-center gap-1">
+      <NextButton
+        v-tooltip.bottom="$t('INBOX.LIST.REFRESH')"
+        icon="i-lucide-refresh-cw"
+        slate
+        sm
+        ghost
+        @click="$emit('refresh')"
+      />
       <NextButton
         icon="i-lucide-sliders-vertical"
         slate
