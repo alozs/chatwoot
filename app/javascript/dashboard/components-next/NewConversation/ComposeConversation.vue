@@ -211,6 +211,14 @@ const onPopoverHide = () => {
   emit('close');
 };
 
+// O registro do contato traz apenas os vinculos ja existentes; um contato
+// criado a mao nao tem nenhum e o composer dizia nao haver caixa disponivel.
+// Buscamos as caixas contactaveis (mesmo caminho da selecao via busca), que
+// incluem e-mail quando ha e-mail e as caixas de API — como o WhatsApp da
+// ponte, que resolve o destinatario pelo telefone do contato.
+const fetchedContactableInboxes = ref(null);
+const lastFetchedContactId = ref(null);
+
 watch(
   activeContact,
   (currentContact, previousContact) => {
@@ -222,10 +230,28 @@ watch(
         formState.message = '';
       }
 
+      if (currentContact.id !== lastFetchedContactId.value) {
+        lastFetchedContactId.value = currentContact.id;
+        fetchedContactableInboxes.value = null;
+        isFetchingInboxes.value = true;
+        fetchContactableInboxes(currentContact.id)
+          .then(inboxes => {
+            fetchedContactableInboxes.value = inboxes;
+            selectedContact.value = {
+              ...activeContact.value,
+              contactInboxes: mergeInboxDetails(inboxes, inboxesList.value),
+            };
+          })
+          .catch(() => {})
+          .finally(() => {
+            isFetchingInboxes.value = false;
+          });
+      }
+
       // First process the contactable inboxes to get the right structure
-      const processedInboxes = processContactableInboxes(
-        currentContact.contactInboxes || []
-      );
+      const processedInboxes =
+        fetchedContactableInboxes.value ||
+        processContactableInboxes(currentContact.contactInboxes || []);
       // Then Merge processedInboxes with the inboxes list
       selectedContact.value = {
         ...currentContact,
