@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { getLastMessage } from 'dashboard/helper/conversationHelper';
+import { contactDisplayName } from 'dashboard/helper/contactNameHelper';
 import Avatar from 'next/avatar/Avatar.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import MessagePreview from './MessagePreview.vue';
@@ -34,6 +35,8 @@ const emit = defineEmits([
 ]);
 
 const hovered = ref(false);
+
+const contactName = computed(() => contactDisplayName(props.currentContact));
 
 const unreadCount = computed(() => props.chat.unread_count);
 const hasUnread = computed(() => unreadCount.value > 0);
@@ -139,7 +142,7 @@ watch(
     >
       <Avatar
         v-if="!hideThumbnail"
-        :name="currentContact.name"
+        :name="contactName"
         :src="currentContact.thumbnail"
         :size="24"
         :status="currentContact.availability_status"
@@ -196,7 +199,7 @@ watch(
         class="conversation--user text-sm my-0 mx-2 capitalize pt-0.5 text-ellipsis overflow-hidden whitespace-nowrap flex-1 min-w-0 ltr:pr-16 rtl:pl-16 text-n-slate-12"
         :class="hasUnread ? 'font-semibold' : 'font-medium'"
       >
-        {{ currentContact.name }}
+        {{ contactName }}
       </h4>
       <VoiceCallStatus
         v-if="voiceCallData.status"

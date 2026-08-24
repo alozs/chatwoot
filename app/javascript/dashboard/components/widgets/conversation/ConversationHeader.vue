@@ -12,6 +12,7 @@ import ConversationCallButton from './ConversationCallButton.vue';
 import wootConstants from 'dashboard/constants/globals';
 import { conversationListPageURL } from 'dashboard/helper/URLHelper';
 import { snoozedReopenTime } from 'dashboard/helper/snoozeHelpers';
+import { contactDisplayName } from 'dashboard/helper/contactNameHelper';
 import { useInbox } from 'dashboard/composables/useInbox';
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
@@ -72,14 +73,18 @@ const currentContact = computed(() =>
   store.getters['contacts/getContact'](props.chat.meta.sender.id)
 );
 
+const contactName = computed(() => contactDisplayName(currentContact.value));
+
 // Identifica a conversa alem do nome do contato: no e-mail, o assunto; nos
-// canais de mensagem, que nao tem assunto, o telefone do contato.
-const headerDetail = computed(
-  () =>
+// canais de mensagem, que nao tem assunto, o telefone do contato — exceto
+// quando o nome exibido ja e o proprio telefone.
+const headerDetail = computed(() => {
+  const detail =
     props.chat?.additional_attributes?.mail_subject ||
     currentContact.value?.phone_number ||
-    ''
-);
+    '';
+  return detail === contactName.value ? '' : detail;
+});
 
 const isSnoozed = computed(
   () => currentChat.value.status === wootConstants.STATUS_TYPE.SNOOZED
@@ -130,7 +135,7 @@ const copyConversationId = async () => {
         class="me-2"
       />
       <Avatar
-        :name="currentContact.name"
+        :name="contactName"
         :src="currentContact.thumbnail"
         :size="32"
         :status="currentContact.availability_status"
@@ -141,7 +146,7 @@ const copyConversationId = async () => {
           <span
             class="text-sm font-medium truncate leading-tight text-n-slate-12"
           >
-            {{ currentContact.name }}
+            {{ contactName }}
           </span>
           <fluent-icon
             v-if="!isHMACVerified"
