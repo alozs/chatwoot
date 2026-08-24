@@ -120,6 +120,8 @@
       "REOPEN_ACTION": "Reabrir",
       "OPEN_ACTION": "Abrir",
       "MORE_ACTIONS": "Mais ações",
+      "DOWNLOAD_PHOTO": "Baixar foto",
+      "DOWNLOAD_PHOTO_ERROR": "Não foi possível baixar a foto! Tente novamente",
       "OPEN": "Mais",
       "CLOSE": "Fechar",
       "DETAILS": "detalhes",

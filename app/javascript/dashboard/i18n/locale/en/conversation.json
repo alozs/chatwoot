@@ -130,6 +130,8 @@
       "REOPEN_ACTION": "Reopen",
       "OPEN_ACTION": "Open",
       "MORE_ACTIONS": "More actions",
+      "DOWNLOAD_PHOTO": "Download photo",
+      "DOWNLOAD_PHOTO_ERROR": "Couldn't download the photo! Try again",
       "OPEN": "More",
       "CLOSE": "Close",
       "DETAILS": "details",

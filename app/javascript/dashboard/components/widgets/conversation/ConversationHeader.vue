@@ -17,6 +17,7 @@ import { useInbox } from 'dashboard/composables/useInbox';
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 import { copyTextToClipboard } from 'shared/helpers/clipboard';
+import { downloadFile } from '@chatwoot/utils';
 
 const props = defineProps({
   chat: {
@@ -74,6 +75,21 @@ const currentContact = computed(() =>
 );
 
 const contactName = computed(() => contactDisplayName(currentContact.value));
+
+// A foto do contato baixa com um clique no avatar; sem foto o clique nao faz
+// nada e o cursor segue normal.
+const hasContactPhoto = computed(() =>
+  Boolean(currentContact.value?.thumbnail)
+);
+
+const downloadContactPhoto = async () => {
+  if (!hasContactPhoto.value) return;
+  try {
+    await downloadFile({ url: currentContact.value.thumbnail, type: 'image' });
+  } catch {
+    useAlert(t('CONVERSATION.HEADER.DOWNLOAD_PHOTO_ERROR'));
+  }
+};
 
 // Identifica a conversa alem do nome do contato: no e-mail, o assunto; nos
 // canais de mensagem, que nao tem assunto, o telefone do contato — exceto
@@ -134,13 +150,23 @@ const copyConversationId = async () => {
         :back-url="backButtonUrl"
         class="me-2"
       />
-      <Avatar
-        :name="contactName"
-        :src="currentContact.thumbnail"
-        :size="32"
-        :status="currentContact.availability_status"
-        hide-offline-status
-      />
+      <button
+        v-tooltip.bottom="
+          hasContactPhoto ? $t('CONVERSATION.HEADER.DOWNLOAD_PHOTO') : ''
+        "
+        type="button"
+        class="flex flex-shrink-0 !p-0"
+        :class="hasContactPhoto ? 'cursor-pointer' : 'cursor-default'"
+        @click="downloadContactPhoto"
+      >
+        <Avatar
+          :name="contactName"
+          :src="currentContact.thumbnail"
+          :size="32"
+          :status="currentContact.availability_status"
+          hide-offline-status
+        />
+      </button>
       <div class="flex flex-col items-start min-w-0 ms-2 overflow-hidden">
         <div class="flex flex-row items-center max-w-full gap-1 p-0 m-0">
           <span
